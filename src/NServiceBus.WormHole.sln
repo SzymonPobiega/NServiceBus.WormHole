@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.WormHole", "NServiceBus.WormHole\NServiceBus.WormHole.csproj", "{86D000A5-F7B3-490F-9023-AF48290CF26C}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Transports.Http", "NServiceBus.Transports.Http\NServiceBus.Transports.Http.csproj", "{EA028D3A-A64C-4214-995F-48C075E02B4A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerTest", "ServerTest\ServerTest.csproj", "{682A42BE-09F8-402B-A157-5202EB39CFEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Transports.Http.AcceptanceTests", "NServiceBus.Transports.Http.AcceptanceTests\NServiceBus.Transports.Http.AcceptanceTests.csproj", "{F439AE07-DB86-4AD5-90C2-916314659097}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{682A42BE-09F8-402B-A157-5202EB39CFEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{682A42BE-09F8-402B-A157-5202EB39CFEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{682A42BE-09F8-402B-A157-5202EB39CFEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F439AE07-DB86-4AD5-90C2-916314659097}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F439AE07-DB86-4AD5-90C2-916314659097}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F439AE07-DB86-4AD5-90C2-916314659097}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F439AE07-DB86-4AD5-90C2-916314659097}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

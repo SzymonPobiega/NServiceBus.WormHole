@@ -1,10 +1,9 @@
-﻿using System.Text;
-
-namespace NServiceBus.Transports.Http
+﻿namespace NServiceBus.Transports.Http
 {
+    using Routing;
     using Settings;
     using Transport;
-    public class HttpTransport : TransportDefinition
+    public class HttpTransport : TransportDefinition, IMessageDrivenSubscriptionTransport
     {
         public override TransportInfrastructure Initialize(SettingsHolder settings, string connectionString)
         {

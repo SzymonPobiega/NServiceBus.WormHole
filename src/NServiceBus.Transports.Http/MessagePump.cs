@@ -8,19 +8,17 @@ namespace NServiceBus.Transports.Http
     using System.Threading.Tasks;
     using Extensibility;
     using Logging;
+    using Microsoft.Extensions.Primitives;
     using Microsoft.Net.Http.Server;
     using Transport;
 
     class MessagePump : IPushMessages
     {
-        public MessagePump(string connectionString)
-        {
-            listenPrefix = connectionString;
-        }
-
         public Task Init(Func<MessageContext, Task> onMessage, Func<ErrorContext, Task<ErrorHandleResult>> onError, CriticalError criticalError, PushSettings settings)
         {
             this.onMessage = onMessage;
+            this.onError = onError;
+            inputQueue = settings.InputQueue;
 
             listenCircuitBreaker = new RepeatedFailuresOverTimeCircuitBreaker("Listen", TimeSpan.FromSeconds(30), ex => criticalError.Raise("Failed to listen " + settings.InputQueue, ex));
             receiveCircuitBreaker = new RepeatedFailuresOverTimeCircuitBreaker("Receive", TimeSpan.FromSeconds(30), ex => criticalError.Raise("Failed to receive from " + settings.InputQueue, ex));
@@ -34,7 +32,7 @@ namespace NServiceBus.Transports.Http
             concurrencyLimiter = new SemaphoreSlim(limitations.MaxConcurrency);
 
             var settings = new WebListenerSettings();
-            settings.UrlPrefixes.Add(listenPrefix);
+            settings.UrlPrefixes.Add(inputQueue);
             stopTokenSource = new CancellationTokenSource();
             listener = new WebListener(settings);
             listener.Start();
@@ -107,6 +105,7 @@ namespace NServiceBus.Transports.Http
                 try
                 {
                     await ProcessMessage(context).ConfigureAwait(false);
+                    context.Dispose();
                     messagePump.receiveCircuitBreaker.Success();
                 }
                 catch (OperationCanceledException)
@@ -115,6 +114,7 @@ namespace NServiceBus.Transports.Http
                 }
                 catch (Exception ex)
                 {
+                    context.Abort();
                     Logger.Warn("HTTP receive operation failed", ex);
                     await messagePump.receiveCircuitBreaker.Failure(ex).ConfigureAwait(false);
                 }
@@ -143,8 +143,14 @@ namespace NServiceBus.Transports.Http
                 .Where(x => x.Key.StartsWith("X-NSB-"))
                 .ToDictionary(x => WebUtility.UrlDecode(x.Key.Substring(6)), x => WebUtility.UrlDecode(x.Value));
 
-            var uri = new Uri(context.Request.RawUrl);
-            var id = uri.Segments.Last().Trim('/');
+            var processingFailures = 0;
+            StringValues processingFailuresValues;
+            if (context.Request.Headers.TryGetValue("X-NSBHttp-ImmediateFailures", out processingFailuresValues))
+            {
+                processingFailures = int.Parse(processingFailuresValues[0]);
+            }
+
+            var id = context.Request.Path.Trim('/');
 
             using (var tokenSource = new CancellationTokenSource())
             {
@@ -160,9 +166,17 @@ namespace NServiceBus.Transports.Http
                         context.Response.StatusCode = 503;
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    context.Response.StatusCode = 500;
+                    var errorHandlingResult = await onError(new ErrorContext(ex, headers, id, bodyBuffer, new TransportTransaction(), processingFailures + 1)).ConfigureAwait(false);
+                    if (errorHandlingResult == ErrorHandleResult.Handled)
+                    {
+                        context.Response.StatusCode = 200;
+                    }
+                    else
+                    {
+                        context.Response.StatusCode = 503;
+                    }
                 }
             }
         }
@@ -172,12 +186,12 @@ namespace NServiceBus.Transports.Http
 
         public async Task Stop()
         {
+            listener.Dispose();
             stopTokenSource.Cancel();
             await workerTask.ConfigureAwait(false);
-            listener.Dispose();
         }
 
-        string listenPrefix;
+        string inputQueue;
         ConcurrentDictionary<Task, Task> runningReceiveTasks;
         SemaphoreSlim concurrencyLimiter;
         CancellationTokenSource stopTokenSource;
@@ -188,5 +202,6 @@ namespace NServiceBus.Transports.Http
         RepeatedFailuresOverTimeCircuitBreaker receiveCircuitBreaker;
 
         ILog Logger = LogManager.GetLogger<MessagePump>();
+        Func<ErrorContext, Task<ErrorHandleResult>> onError;
     }
 }

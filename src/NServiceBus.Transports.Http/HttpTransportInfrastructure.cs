@@ -5,24 +5,20 @@ namespace NServiceBus.Transports.Http
     using System.Threading.Tasks;
     using Routing;
     using Settings;
+    using Support;
     using Transport;
 
     class HttpTransportInfrastructure : TransportInfrastructure
     {
-        SettingsHolder settings;
-        string connectionString;
-
         public HttpTransportInfrastructure(SettingsHolder settings, string connectionString)
         {
-            this.settings = settings;
-            this.connectionString = connectionString;
         }
 
         public override TransportReceiveInfrastructure ConfigureReceiveInfrastructure()
         {
             return new TransportReceiveInfrastructure(
-                () => new MessagePump(connectionString), 
-                () => new QueueCreator(connectionString), 
+                () => new MessagePump(), 
+                () => new QueueCreator(), 
                 () => Task.FromResult(StartupCheckResult.Success));
         }
 
@@ -40,16 +36,30 @@ namespace NServiceBus.Transports.Http
 
         public override EndpointInstance BindToLocalEndpoint(EndpointInstance instance)
         {
-            throw new NotImplementedException();
+            return instance.SetProperty("Host", RuntimeEnvironment.MachineName);
         }
 
         public override string ToTransportAddress(LogicalAddress logicalAddress)
         {
-            throw new NotImplementedException();
+            string host;
+            if (!logicalAddress.EndpointInstance.Properties.TryGetValue("Host", out host))
+            {
+                host = RuntimeEnvironment.MachineName;
+            }
+
+            var discriminatorPart = logicalAddress.EndpointInstance.Discriminator != null
+                ? "-" + logicalAddress.EndpointInstance.Discriminator
+                : "";
+
+            var qualifierPart = logicalAddress.Qualifier != null
+                ? "/" + logicalAddress.Qualifier
+                : "";
+
+            return $"http://{host}:7777/{logicalAddress.EndpointInstance.Endpoint}{discriminatorPart}{qualifierPart}";
         }
 
         public override IEnumerable<Type> DeliveryConstraints => new Type[0];
-        public override TransportTransactionMode TransactionMode => TransportTransactionMode.None;
+        public override TransportTransactionMode TransactionMode => TransportTransactionMode.ReceiveOnly;
         public override OutboundRoutingPolicy OutboundRoutingPolicy => new OutboundRoutingPolicy(OutboundRoutingType.Unicast, OutboundRoutingType.Unicast, OutboundRoutingType.Unicast);
     }
 }
