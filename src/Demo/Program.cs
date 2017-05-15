@@ -41,7 +41,7 @@ namespace Demo
         static Task<IWormHoleGateway> StartGatewayB()
         {
             var config = new WormHoleGatewayConfiguration<MsmqTransport, HttpTransport>("WormHole-B", "SiteB");
-            config.ConfigureSite("SiteA", "WormHole-A");
+            config.ConfigureRemoteSite("SiteA", "WormHole-A");
             config.CustomizeLocalTransport((c, t) =>
             {
                 c.AutoCreateQueue();
@@ -54,7 +54,7 @@ namespace Demo
         static Task<IWormHoleGateway> StartGatewayA()
         {
             var config = new WormHoleGatewayConfiguration<SqlServerTransport, HttpTransport>("WormHole-A", "SiteA");
-            config.ConfigureSite("SiteB", "WormHole-B");
+            config.ConfigureRemoteSite("SiteB", "WormHole-B");
             config.CustomizeLocalTransport((c, t) =>
             {
                 t.GetSettings().Set<EndpointInstances>(config.EndpointInstances); //SQL transport requires this :(

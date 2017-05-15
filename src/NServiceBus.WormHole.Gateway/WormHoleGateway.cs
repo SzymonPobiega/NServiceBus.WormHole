@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using NServiceBus.Extensibility;
 using NServiceBus.Raw;
@@ -10,7 +9,7 @@ using NServiceBus.Transport;
 
 namespace NServiceBus.WormHole.Gateway
 {
-    public class WormHoleGateway<TLocalTransport, TWormHoleTransport> : IWormHoleGateway
+    class WormHoleGateway<TLocalTransport, TWormHoleTransport> : IWormHoleGateway, IStartableWormHoleGateway
         where TLocalTransport : TransportDefinition, new()
         where TWormHoleTransport : TransportDefinition, new()
     {
@@ -22,10 +21,8 @@ namespace NServiceBus.WormHole.Gateway
         string poisonMessageQueue;
         Action<RawEndpointConfiguration, TransportExtensions<TLocalTransport>> localEndpointCustomization;
         Action<RawEndpointConfiguration, TransportExtensions<TWormHoleTransport>> wormholeEndpointCustomization;
-        IRawEndpointInstance localInstance;
-        IRawEndpointInstance wormHoleInstance;
-        ISendRawMessages localDispatcher;
-        ISendRawMessages wormHoleDispatcher;
+        IReceivingRawEndpoint localInstance;
+        IReceivingRawEndpoint wormHoleInstance;
 
         internal WormHoleGateway(string name, string site, MessageRouter router, Dictionary<string, string> sites, string poisonMessageQueue,
             Action<RawEndpointConfiguration, TransportExtensions<TLocalTransport>> localEndpointCustomization,
@@ -42,8 +39,11 @@ namespace NServiceBus.WormHole.Gateway
 
         public async Task<IWormHoleGateway> Start()
         {
-            var outsideConfig = RawEndpointConfiguration.Create(name, OnOutsideMessage, poisonMessageQueue);
-            var wormHoleConfig = RawEndpointConfiguration.Create(name, OnWormHoleMessage, poisonMessageQueue);
+            IStartableRawEndpoint outsideStartable = null;
+            IStartableRawEndpoint wormHoleStartable = null;
+
+            var outsideConfig = RawEndpointConfiguration.Create(name, (c, _) => OnOutsideMessage(c, wormHoleStartable), poisonMessageQueue);
+            var wormHoleConfig = RawEndpointConfiguration.Create(name, (c, _) => OnWormHoleMessage(c, outsideStartable), poisonMessageQueue);
 
             var outsideTransport = outsideConfig.UseTransport<TLocalTransport>();
             localEndpointCustomization(outsideConfig, outsideTransport);
@@ -51,12 +51,8 @@ namespace NServiceBus.WormHole.Gateway
             var wormHoleTransport = wormHoleConfig.UseTransport<TWormHoleTransport>();
             wormholeEndpointCustomization(wormHoleConfig, wormHoleTransport);
 
-            var outsideStartable = await RawEndpoint.Create(outsideConfig).ConfigureAwait(false);
-            var wormHoleStartable = await RawEndpoint.Create(wormHoleConfig).ConfigureAwait(false);
-
-            //Store the dispatchers in fields
-            localDispatcher = outsideStartable;
-            wormHoleDispatcher = wormHoleStartable;
+            outsideStartable = await RawEndpoint.Create(outsideConfig).ConfigureAwait(false);
+            wormHoleStartable = await RawEndpoint.Create(wormHoleConfig).ConfigureAwait(false);
 
             //Start receiving
             localInstance = await outsideStartable.Start().ConfigureAwait(false);
@@ -65,7 +61,7 @@ namespace NServiceBus.WormHole.Gateway
             return this;
         }
 
-        Task OnWormHoleMessage(MessageContext context, IDispatchMessages dispatcher)
+        Task OnWormHoleMessage(MessageContext context, IStartableRawEndpoint outsidEndpoint)
         {
             string enclosedTypes;
             string sourceSite;
@@ -91,7 +87,7 @@ namespace NServiceBus.WormHole.Gateway
             if (context.Headers.TryGetValue(Headers.ReplyToAddress, out replyTo))
             {
                 props["ReplyTo"] = replyTo;
-                context.Headers[Headers.ReplyToAddress] = name; //TODO: Use proper address
+                context.Headers[Headers.ReplyToAddress] = wormHoleInstance.TransportAddress;
             }
 
             context.Headers[Headers.CorrelationId] = $"{CorrelationIdHeader}{props.EncodeTLV()}";
@@ -102,25 +98,25 @@ namespace NServiceBus.WormHole.Gateway
             if (context.Headers.TryGetValue("NServiceBus.WormHole.Destination", out destinationAddress)) //In case the source site specified the destination
             {
                 var operation = new TransportOperation(outgoingMessage, new UnicastAddressTag(destinationAddress));
-                return localDispatcher.Dispatch(new TransportOperations(operation), new TransportTransaction(), new ContextBag());
+                return outsidEndpoint.Dispatch(new TransportOperations(operation), new TransportTransaction(), new ContextBag());
             }
 
             //Route according to local information
             var qualifiedNames = enclosedTypes.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             var mainType = MessageType.Parse(qualifiedNames.First());
 
-            var routes = router.Route(mainType, i => localDispatcher.ToTransportAddress(LogicalAddress.CreateRemoteAddress(i)));
+            var routes = router.Route(mainType, i => outsidEndpoint.ToTransportAddress(LogicalAddress.CreateRemoteAddress(i)));
 
             
             if (routes.Length > 0)
             {
                 var ops = routes.Select(r => new TransportOperation(outgoingMessage, new UnicastAddressTag(r))).ToArray();
-                return localDispatcher.Dispatch(new TransportOperations(ops), new TransportTransaction(), new ContextBag());
+                return outsidEndpoint.Dispatch(new TransportOperations(ops), new TransportTransaction(), new ContextBag());
             }
             return MoveToPoisonMessageQueue(context, $"No route specified for message type(s) {enclosedTypes}");
         }
 
-        Task OnOutsideMessage(MessageContext context, IDispatchMessages dispatcher)
+        Task OnOutsideMessage(MessageContext context, IStartableRawEndpoint wormHoleEndpoint)
         {
             string destinationSites;
             if (!context.Headers.TryGetValue("NServiceBus.WormHole.DestinationSites", out destinationSites))
@@ -161,7 +157,7 @@ namespace NServiceBus.WormHole.Gateway
 
             var outgoingMessage = new OutgoingMessage(context.MessageId, context.Headers, context.Body);
             var ops = siteAddresses.Select(a => new TransportOperation(outgoingMessage, new UnicastAddressTag(a))).ToArray();
-            return wormHoleDispatcher.Dispatch(new TransportOperations(ops), new TransportTransaction(), new ContextBag());
+            return wormHoleEndpoint.Dispatch(new TransportOperations(ops), new TransportTransaction(), new ContextBag());
         }
 
         string ResolveAddress(string siteName)
@@ -171,7 +167,7 @@ namespace NServiceBus.WormHole.Gateway
             return siteAddress;
         }
 
-        Task MoveToPoisonMessageQueue(MessageContext context, string message = null)
+        Task MoveToPoisonMessageQueue(MessageContext context, string message)
         {
             //TODO
             Console.WriteLine(message ?? "Boom!");

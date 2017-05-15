@@ -8,7 +8,7 @@ namespace NServiceBus.AcceptanceTests
 
     public abstract partial class NServiceBusAcceptanceTest
     {
-        IRawEndpointInstance errorListener;
+        IReceivingRawEndpoint errorListener;
 
         [SetUp]
         public void StartErrorQueueListener()

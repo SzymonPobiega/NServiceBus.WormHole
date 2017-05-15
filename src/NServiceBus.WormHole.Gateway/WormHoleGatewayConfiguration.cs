@@ -7,18 +7,23 @@ using NServiceBus.Transport;
 
 namespace NServiceBus.WormHole.Gateway
 {
+    /// <summary>
+    /// Configures the worm hole gateway.
+    /// </summary>
+    /// <typeparam name="TLocalTransport">Local transport for this site.</typeparam>
+    /// <typeparam name="TWormHoleTransport">Worm hole tunnel transport (transports messages between sites).</typeparam>
     public class WormHoleGatewayConfiguration<TLocalTransport, TWormHoleTransport>
         where TLocalTransport : TransportDefinition, new()
         where TWormHoleTransport : TransportDefinition, new()
     {
-        string queueName;
+        string localQueueName;
         string site;
 
         List<RoutingTableEntry> routes = new List<RoutingTableEntry>();
         Dictionary<string, string> sites = new Dictionary<string, string>();
 
         Action<RawEndpointConfiguration, TransportExtensions<TLocalTransport>> localTransportCustomization = (c, t) => { };
-        Action<RawEndpointConfiguration, TransportExtensions<TWormHoleTransport>> wormHoleTransportCustomization = (c, t) => { };
+        Action<RawEndpointConfiguration, TransportExtensions<TWormHoleTransport>> tunnelTransportCustomization = (c, t) => { };
 
         /// <summary>
         /// Routing table.
@@ -35,9 +40,14 @@ namespace NServiceBus.WormHole.Gateway
         /// </summary>
         public DistributionPolicy DistributionPolicy { get; } = new DistributionPolicy();
 
-        public WormHoleGatewayConfiguration(string queueName, string site)
+        /// <summary>
+        /// Creates new instance.
+        /// </summary>
+        /// <param name="localQueueName">Name of the queue which is local entry to the tunnel.</param>
+        /// <param name="site">Name of this site.</param>
+        public WormHoleGatewayConfiguration(string localQueueName, string site)
         {
-            this.queueName = queueName;
+            this.localQueueName = localQueueName;
             this.site = site;
         }
 
@@ -54,7 +64,7 @@ namespace NServiceBus.WormHole.Gateway
         }
 
         /// <summary>
-        /// Registers a callback for customizing the worm hole transport.
+        /// Registers a callback for customizing the worm hole tunnel transport.
         /// </summary>
         public void CustomizeWormHoleTransport(Action<RawEndpointConfiguration, TransportExtensions<TWormHoleTransport>> customization)
         {
@@ -62,25 +72,25 @@ namespace NServiceBus.WormHole.Gateway
             {
                 throw new ArgumentNullException(nameof(customization));
             }
-            wormHoleTransportCustomization = customization;
+            tunnelTransportCustomization = customization;
         }
 
         /// <summary>
-        /// Configures destination transport address for a given site.
+        /// Configures destination transport address for a given remote site.
         /// </summary>
-        /// <param name="site">Site</param>
+        /// <param name="remoteSite">Site</param>
         /// <param name="destinationAddress">Destination address.</param>
-        public void ConfigureSite(string site, string destinationAddress)
+        public void ConfigureRemoteSite(string remoteSite, string destinationAddress)
         {
-            if (site == null)
+            if (remoteSite == null)
             {
-                throw new ArgumentNullException(nameof(site));
+                throw new ArgumentNullException(nameof(remoteSite));
             }
             if (destinationAddress == null)
             {
                 throw new ArgumentNullException(nameof(destinationAddress));
             }
-            sites[site] = destinationAddress;
+            sites[remoteSite] = destinationAddress;
         }
 
         /// <summary>
@@ -141,16 +151,22 @@ namespace NServiceBus.WormHole.Gateway
             routes.Add(new RoutingTableEntry(new MessageTypeRange(assembly, @namespace), UnicastRoute.CreateFromEndpointName(destination)));
         }
 
-        public WormHoleGateway<TLocalTransport, TWormHoleTransport> Build()
+        /// <summary>
+        /// Builds a worm hole gateway instance.
+        /// </summary>
+        public IStartableWormHoleGateway Build()
         {
             RoutingTable.AddOrReplaceRoutes("StaticConfiguration", routes);
 
             var router = new MessageRouter(RoutingTable, EndpointInstances, DistributionPolicy);
 
-            return new WormHoleGateway<TLocalTransport, TWormHoleTransport>(queueName, site, router, sites, "poison",
-                localTransportCustomization, wormHoleTransportCustomization);
+            return new WormHoleGateway<TLocalTransport, TWormHoleTransport>(localQueueName, site, router, sites, "poison",
+                localTransportCustomization, tunnelTransportCustomization);
         }
 
+        /// <summary>
+        /// Builds and starta w worm hole gateway instance.
+        /// </summary>
         public Task<IWormHoleGateway> Start()
         {
             var gatway = Build();
