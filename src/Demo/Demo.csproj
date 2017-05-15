@@ -90,6 +90,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\NServiceBus.Transports.Http\NServiceBus.Transports.Http.csproj">
+      <Project>{ea028d3a-a64c-4214-995f-48c075e02b4a}</Project>
+      <Name>NServiceBus.Transports.Http</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NServiceBus.WormHole.Gateway\NServiceBus.WormHole.Gateway.csproj">
       <Project>{f9bccc2d-4f86-4c1d-90df-3ba29f026a36}</Project>
       <Name>NServiceBus.WormHole.Gateway</Name>

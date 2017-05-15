@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NServiceBus.Configuration.AdvanceExtensibility;
 using NServiceBus.Settings;
 
 namespace NServiceBus.WormHole
 {
+    using System.Linq;
+
     public class WormHoleRoutingSettings : ExposeSettings
     {
         internal string GatwayAddress { get; }
-        internal Dictionary<Type, HashSet<string>> RouteTable { get; } = new Dictionary<Type, HashSet<string>>();
+        internal Dictionary<Type, Func<object, string[]>> RouteTable { get; } = new Dictionary<Type, Func<object, string[]>>();
 
         public WormHoleRoutingSettings(string gatwayAddress, SettingsHolder settings) : base(settings)
         {
@@ -19,39 +18,60 @@ namespace NServiceBus.WormHole
         }
 
         /// <summary>
-        /// Configures routing of a given message type to the provided site via the worm hole.
+        /// Configures routing of a given message type to the provided sites via the worm hole.
         /// </summary>
-        /// <param name="messageType">Type of message.</param>
-        /// <param name="destinationSites">Destination site.</param>
-        public WormHoleRoutingSettings RouteToSites(Type messageType, params string[] destinationSites)
+        /// <param name="sitesProperty">The property of message that contains the names of the destination sites.</param>
+        public WormHoleRoutingSettings RouteToSite<T>(Func<T, IEnumerable<string>> sitesProperty)
         {
-            if (messageType == null)
+            if (sitesProperty == null)
             {
-                throw new ArgumentNullException(nameof(messageType));
-            }
-            if (destinationSites == null)
-            {
-                throw new ArgumentNullException(nameof(destinationSites));
-            }
-            if (destinationSites.Length == 0)
-            {
-                throw new ArgumentException("Site list cannot be empty.", nameof(destinationSites));
+                throw new ArgumentNullException(nameof(sitesProperty));
             }
 
-            HashSet<string> sites;
-            if (!RouteTable.TryGetValue(messageType, out sites))
+            Func<object, string[]> callback = o =>
             {
-                sites = new HashSet<string>();
-                RouteTable[messageType] = sites;
-            }
-            foreach (var site in destinationSites)
+                var message = (T)o;
+                return sitesProperty(message).ToArray();
+            };
+
+            RouteTable[typeof(T)] = callback;
+            return this;
+        }
+
+        /// <summary>
+        /// Configures routing of a given message type to the provided site via the worm hole.
+        /// </summary>
+        /// <param name="siteProperty">The property of message that contains the name of the destination site.</param>
+        public WormHoleRoutingSettings RouteToSite<T>(Func<T, string> siteProperty)
+        {
+            if (siteProperty == null)
             {
-                if (site.Contains(";"))
-                {
-                    throw new Exception($"Site name cannot contain a semicolon: {site}.");
-                }
-                sites.Add(site);
+                throw new ArgumentNullException(nameof(siteProperty));
             }
+
+            Func<object, string[]> callback = o =>
+            {
+                var message = (T) o;
+                return new[] {siteProperty(message)};
+            };
+
+            RouteTable[typeof(T)] = callback;
+            return this;
+        }
+
+        /// <summary>
+        /// Configures routing of a given message type to the provided site via the worm hole.
+        /// </summary>
+        /// <param name="destinationSite">The name of the destination site.</param>
+        public WormHoleRoutingSettings RouteToSite<T>(string destinationSite)
+        {
+            if (destinationSite == null)
+            {
+                throw new ArgumentNullException(nameof(destinationSite));
+            }
+
+            Func<object, string[]> callback = o => new[] { destinationSite };
+            RouteTable[typeof(T)] = callback;
             return this;
         }
     }

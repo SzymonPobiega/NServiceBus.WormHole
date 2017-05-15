@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Configuration.AdvanceExtensibility;
-using NServiceBus.Raw;
 using NServiceBus.Routing;
 using NServiceBus.WormHole;
 using NServiceBus.WormHole.Gateway;
 
 namespace Demo
 {
+    using NServiceBus.Transports.Http;
+
     class Program
     {
         const string SqlConnectionString = @"Data Source=.\SQLEXPRESS;Initial Catalog=nservicebus;Integrated Security=True;";
@@ -33,14 +31,16 @@ namespace Demo
                 Console.WriteLine("Press <enter> to send a message");
                 Console.ReadLine();
 
-                await endpointA.Send(new MyMessage());
+                await endpointA.Send(new MyMessage
+                {
+                    Destination = "SiteB"
+                });
             }
         }
 
         static Task<IWormHoleGateway> StartGatewayB()
         {
-            var config = new WormHoleGatewayConfiguration<MsmqTransport, RabbitMQTransport>("WormHole-B", "SiteB");
-            config.CustomizeWormHoleTransport(ConfigureWormHoleTransport);
+            var config = new WormHoleGatewayConfiguration<MsmqTransport, HttpTransport>("WormHole-B", "SiteB");
             config.ConfigureSite("SiteA", "WormHole-A");
             config.CustomizeLocalTransport((c, t) =>
             {
@@ -53,8 +53,7 @@ namespace Demo
 
         static Task<IWormHoleGateway> StartGatewayA()
         {
-            var config = new WormHoleGatewayConfiguration<SqlServerTransport, RabbitMQTransport>("WormHole-A", "SiteA");
-            config.CustomizeWormHoleTransport(ConfigureWormHoleTransport);
+            var config = new WormHoleGatewayConfiguration<SqlServerTransport, HttpTransport>("WormHole-A", "SiteA");
             config.ConfigureSite("SiteB", "WormHole-B");
             config.CustomizeLocalTransport((c, t) =>
             {
@@ -64,12 +63,6 @@ namespace Demo
             });
 
             return config.Start();
-        }
-
-        static void ConfigureWormHoleTransport(RawEndpointConfiguration c, TransportExtensions<RabbitMQTransport> t)
-        {
-            t.ConnectionString("host=localhost");
-            c.AutoCreateQueue();
         }
 
         static async Task<IEndpointInstance> StartEndpointB()
@@ -86,7 +79,7 @@ namespace Demo
             config.UseTransport<SqlServerTransport>().ConnectionString(SqlConnectionString);
 
             var wormHoleSettings = config.UseWormHoleGateway("WormHole-A");
-            wormHoleSettings.RouteToSites(typeof(MyMessage), "SiteB");
+            wormHoleSettings.RouteToSite<MyMessage>(m => m.Destination);
 
             return await Endpoint.Start(config);
         }

@@ -5,20 +5,27 @@ using NServiceBus.Pipeline;
 
 namespace NServiceBus.WormHole
 {
+    using System.Linq;
+
     class SiteEnricherBehavior : Behavior<IOutgoingSendContext>
     {
-        Dictionary<Type, HashSet<string>> siteMap;
+        Dictionary<Type, Func<object, string[]>> siteMap;
 
-        public SiteEnricherBehavior(Dictionary<Type, HashSet<string>> siteMap)
+        public SiteEnricherBehavior(Dictionary<Type, Func<object, string[]>> siteMap)
         {
             this.siteMap = siteMap;
         }
 
         public override Task Invoke(IOutgoingSendContext context, Func<Task> next)
         {
-            HashSet<string> sites;
-            if (siteMap.TryGetValue(context.Message.MessageType, out sites))
+            Func<object, string[]> siteCallback;
+            if (siteMap.TryGetValue(context.Message.MessageType, out siteCallback))
             {
+                var sites = siteCallback(context.Message.Instance);
+                if (sites.Any(s => s.Contains(";")))
+                {
+                    throw new Exception("Site name cannot contain a semicolon.");
+                }
                 context.Headers["NServiceBus.WormHole.DestinationSites"] = string.Join(";", sites);
             }
             return next();
