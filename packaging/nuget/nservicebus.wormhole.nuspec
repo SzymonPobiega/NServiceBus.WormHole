@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>NServiceBus.WormHole</id>
+    <title>NServiceBus.WormHole</title>
+    <version>$version$</version>
+    <authors>Szymon Pobiega</authors>
+    <owners>SzymonPobiega</owners>    
+    <projectUrl>https://github.com/SzymonPobiega/NServiceBus.WormHole</projectUrl>
+	<licenseUrl>https://github.com/SzymonPobiega/NServiceBus.WormHole/blob/master/LICENSE</licenseUrl>
+    <iconUrl>https://WormHole.githubusercontent.com/SzymonPobiega/NServiceBus.WormHole/master/icons/worm-hole.png</iconUrl>
+    <requireLicenseAcceptance>$requireLicenseAcceptance$</requireLicenseAcceptance>
+    <description>Allows to connect NServiceBus endpoints in different geographical locations</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2017 Szymon Pobiega</copyright>
+    <tags>nservicebus gateway wormhole messages</tags>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System" targetFramework="net46" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework="net46" />
+    </frameworkAssemblies>
+    <dependencies>
+      <dependency id="NServiceBus" version="[6.2.0, 7.0.0)" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\..\binaries\NServiceBus.WormHole.???" target="lib\net46" />
+  </files>
+</package>
