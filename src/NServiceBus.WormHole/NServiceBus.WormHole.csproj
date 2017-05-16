@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ReplyBehavior.cs" />
     <Compile Include="InternalsVisibleTo.cs" />
     <Compile Include="SiteEnricherBehavior.cs" />
     <Compile Include="WormHoleRoutingFeature.cs" />

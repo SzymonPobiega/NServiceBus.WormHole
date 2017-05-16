@@ -88,18 +88,13 @@ namespace NServiceBus.WormHole.Gateway
                 MoveToPoisonMessageQueue("The message does not contain the NServiceBus.EnclosedMessageTypes header");
             }
             
-            var props = new Dictionary<string, string> { ["Site"] = sourceSite };
-
             //If there is a reply-to header, substitute it with the gateway queue
             if (context.Headers.TryGetValue(Headers.ReplyToAddress, out replyTo))
             {
-                props["ReplyTo"] = replyTo;
+                context.Headers["NServiceBus.WormHole.ReplyToAddress"] = replyTo;
                 context.Headers[Headers.ReplyToAddress] = outsideEndpoint.TransportAddress;
             }
-
-            context.Headers[Headers.CorrelationId] = $"{CorrelationIdHeader}{props.EncodeTLV()}";
-            context.Headers.Remove("NServiceBus.WormHole.SourceSite");
-
+            
             var outgoingMessage = new OutgoingMessage(context.MessageId, context.Headers, context.Body);
 
             if (context.Headers.TryGetValue("NServiceBus.WormHole.Destination", out destinationAddress)) //In case the source site specified the destination
@@ -133,28 +128,7 @@ namespace NServiceBus.WormHole.Gateway
             string destinationSites;
             if (!context.Headers.TryGetValue("NServiceBus.WormHole.DestinationSites", out destinationSites))
             {
-                //This can be a reply for a worm hole message. Check the correlation ID
-                string correlation;
-                if (!context.Headers.TryGetValue(Headers.CorrelationId, out correlation))
-                {
-                    return MoveToPoisonMessageQueue("The message does not contain site information nor correlation ID.");
-                }
-                if (!correlation.StartsWith(CorrelationIdHeader))
-                {
-                    return MoveToPoisonMessageQueue($"The correlation ID does not begin with an expected header {CorrelationIdHeader}.");
-                }
-                var trimmed = correlation.Substring(CorrelationIdHeader.Length);
-                var props = trimmed.DecodeTLV();
-                if (!props.TryGetValue("Site", out destinationSites))
-                {
-                    return MoveToPoisonMessageQueue("The correlation ID does not contain site information.");
-                }
-                string originalReplyTo;
-                if (!props.TryGetValue("ReplyTo", out originalReplyTo))
-                {
-                    return MoveToPoisonMessageQueue("The correlation ID does not contain reply address information.");
-                }
-                context.Headers["NServiceBus.WormHole.Destination"] = originalReplyTo;
+                return MoveToPoisonMessageQueue("Message has no 'NServiceBus.WormHole.DestinationSites' header.");
             }
 
             var siteList = destinationSites.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);

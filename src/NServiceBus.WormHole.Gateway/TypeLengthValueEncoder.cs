@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace NServiceBus.WormHole.Gateway
@@ -14,7 +13,7 @@ namespace NServiceBus.WormHole.Gateway
 
         public static Dictionary<string, string> DecodeTLV(this string tlvString)
         {
-            Dictionary<string, string> result = new Dictionary<string, string>();
+            var result = new Dictionary<string, string>();
             var remaining = tlvString;
             while (true)
             {
@@ -50,7 +49,7 @@ namespace NServiceBus.WormHole.Gateway
                 }
                 if (!remaining.StartsWith("|"))
                 {
-                    throw new Exception($"Expected separator");
+                    throw new Exception("Expected separator");
                 }
                 remaining = remaining.Substring(1);
             }

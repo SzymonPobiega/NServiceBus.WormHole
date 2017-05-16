@@ -71,7 +71,10 @@ public class When_replying_to_a_message : NServiceBusAcceptanceTest
     {
         public Receiver()
         {
-            EndpointSetup<DefaultServer>();
+            EndpointSetup<DefaultServer>(c =>
+            {
+                c.UseWormHoleGateway("SiteB");
+            });
         }
 
         class MyRequestHandler : IHandleMessages<MyRequest>

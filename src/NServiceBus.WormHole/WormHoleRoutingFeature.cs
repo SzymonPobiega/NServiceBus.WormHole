@@ -17,6 +17,7 @@ namespace NServiceBus.WormHole
             unicastRouteTable.AddOrReplaceRoutes("NServiceBus.WormHole", routeTableEntries);
 
             context.Pipeline.Register(new SiteEnricherBehavior(routingSettings.RouteTable), "Adds information about destination site.");
+            context.Pipeline.Register(new ReplyBehavior(), "Applies reply behavior.");
         }
     }
 }
