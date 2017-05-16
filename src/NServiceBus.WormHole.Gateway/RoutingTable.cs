@@ -1,9 +1,7 @@
-﻿using System.Collections.Concurrent;
-using NServiceBus.Routing;
+﻿using NServiceBus.Routing;
 
 namespace NServiceBus.WormHole.Gateway
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;

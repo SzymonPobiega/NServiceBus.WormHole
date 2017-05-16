@@ -1,5 +1,4 @@
-﻿using System;
-using NServiceBus.Routing;
+﻿using NServiceBus.Routing;
 
 namespace NServiceBus.WormHole.Gateway
 {

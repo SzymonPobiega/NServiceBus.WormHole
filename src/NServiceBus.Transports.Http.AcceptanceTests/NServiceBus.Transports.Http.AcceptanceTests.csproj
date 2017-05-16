@@ -307,7 +307,6 @@
     <Compile Include="App_Packages\NSB.AcceptanceTests.6.1.4\Versioning\When_multiple_versions_of_a_message_is_published.cs" />
     <Compile Include="ConfigureEndpointHttpTransport.cs" />
     <Compile Include="NServiceBusAcceptanceTest.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -317,6 +316,9 @@
       <Project>{ea028d3a-a64c-4214-995f-48c075e02b4a}</Project>
       <Name>NServiceBus.Transports.Http</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
