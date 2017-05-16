@@ -41,6 +41,11 @@ namespace NServiceBus.WormHole.Gateway
         public DistributionPolicy DistributionPolicy { get; } = new DistributionPolicy();
 
         /// <summary>
+        /// Gets or sets the error queue.
+        /// </summary>
+        public string ErrorQueue { get; set; } = "error";
+
+        /// <summary>
         /// Creates new instance.
         /// </summary>
         /// <param name="localQueueName">Name of the queue which is local entry to the tunnel.</param>
@@ -160,7 +165,7 @@ namespace NServiceBus.WormHole.Gateway
 
             var router = new MessageRouter(RoutingTable, EndpointInstances, DistributionPolicy);
 
-            return new WormHoleGateway<TLocalTransport, TWormHoleTransport>(localQueueName, site, router, sites, "poison",
+            return new WormHoleGateway<TLocalTransport, TWormHoleTransport>(localQueueName, site, router, sites, ErrorQueue,
                 localTransportCustomization, tunnelTransportCustomization);
         }
 

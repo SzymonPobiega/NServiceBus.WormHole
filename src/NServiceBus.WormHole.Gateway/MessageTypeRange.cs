@@ -31,7 +31,7 @@ namespace NServiceBus.WormHole.Gateway
                 && (Namespace == null || spec.Namespace == Namespace);
         }
 
-        public MessageTypeRange(string ns, string assembly)
+        public MessageTypeRange(string assembly, string ns)
         {
             if (assembly == null)
             {

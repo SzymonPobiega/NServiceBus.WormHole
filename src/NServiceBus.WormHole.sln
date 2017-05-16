@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Transports.Http
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Transports.Http.AcceptanceTests", "NServiceBus.Transports.Http.AcceptanceTests\NServiceBus.Transports.Http.AcceptanceTests.csproj", "{F439AE07-DB86-4AD5-90C2-916314659097}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.WormHole.AcceptanceTests", "NServiceBus.WormHole.AcceptanceTests\NServiceBus.WormHole.AcceptanceTests.csproj", "{E2626E98-C1FC-4514-BEE1-6A9260F99B98}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{F439AE07-DB86-4AD5-90C2-916314659097}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F439AE07-DB86-4AD5-90C2-916314659097}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F439AE07-DB86-4AD5-90C2-916314659097}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2626E98-C1FC-4514-BEE1-6A9260F99B98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2626E98-C1FC-4514-BEE1-6A9260F99B98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2626E98-C1FC-4514-BEE1-6A9260F99B98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2626E98-C1FC-4514-BEE1-6A9260F99B98}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

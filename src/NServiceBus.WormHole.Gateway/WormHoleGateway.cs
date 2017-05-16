@@ -9,10 +9,14 @@ using NServiceBus.Transport;
 
 namespace NServiceBus.WormHole.Gateway
 {
+    using Logging;
+
     class WormHoleGateway<TLocalTransport, TWormHoleTransport> : IWormHoleGateway, IStartableWormHoleGateway
         where TLocalTransport : TransportDefinition, new()
         where TWormHoleTransport : TransportDefinition, new()
     {
+        ILog log = LogManager.GetLogger(typeof(WormHoleGateway<,>));
+
         const string CorrelationIdHeader = "NServiceBus.WormHole|";
         string name;
         string thisSite;
@@ -42,8 +46,14 @@ namespace NServiceBus.WormHole.Gateway
             IStartableRawEndpoint outsideStartable = null;
             IStartableRawEndpoint wormHoleStartable = null;
 
-            var outsideConfig = RawEndpointConfiguration.Create(name, (c, _) => OnOutsideMessage(c, wormHoleStartable), poisonMessageQueue);
+            var outsideConfig = RawEndpointConfiguration.Create(name, (c, _) => OnOutsideMessage(c, wormHoleStartable, outsideStartable), poisonMessageQueue);
             var wormHoleConfig = RawEndpointConfiguration.Create(name, (c, _) => OnWormHoleMessage(c, outsideStartable), poisonMessageQueue);
+
+            outsideConfig.AutoCreateQueue();
+            wormHoleConfig.AutoCreateQueue();
+
+            outsideConfig.CustomErrorHandlingPolicy(new OutsideErrorHandlingPolicy(poisonMessageQueue, 5));
+            wormHoleConfig.CustomErrorHandlingPolicy(new GatewayErrorHandlingPolicy());
 
             var outsideTransport = outsideConfig.UseTransport<TLocalTransport>();
             localEndpointCustomization(outsideConfig, outsideTransport);
@@ -61,33 +71,30 @@ namespace NServiceBus.WormHole.Gateway
             return this;
         }
 
-        Task OnWormHoleMessage(MessageContext context, IStartableRawEndpoint outsidEndpoint)
+        static Task OnWormHoleMessage(MessageContext context, IRawEndpoint outsideEndpoint)
+        {
+            var outgoingMessage = new OutgoingMessage(context.MessageId, context.Headers, context.Body);
+            var op = new TransportOperation(outgoingMessage, new UnicastAddressTag(outsideEndpoint.TransportAddress));
+            return outsideEndpoint.Dispatch(new TransportOperations(op), new TransportTransaction(), new ContextBag());
+        }
+
+        Task OnWormHoleMessage(string sourceSite, MessageContext context, IRawEndpoint outsideEndpoint)
         {
             string enclosedTypes;
-            string sourceSite;
-            string correlationId;
             string destinationAddress;
             string replyTo;
             if (!context.Headers.TryGetValue(Headers.EnclosedMessageTypes, out enclosedTypes))
             {
-                MoveToPoisonMessageQueue(context, "The message does not contain the NServiceBus.EnclosedMessageTypes header");
+                MoveToPoisonMessageQueue("The message does not contain the NServiceBus.EnclosedMessageTypes header");
             }
-            if (!context.Headers.TryGetValue("NServiceBus.WormHole.SourceSite", out sourceSite))
-            {
-                MoveToPoisonMessageQueue(context, "The message does not contain the NServiceBus.WormHole.SourceSite header.");
-            }
-            if (!context.Headers.TryGetValue(Headers.CorrelationId, out correlationId))
-            {
-                MoveToPoisonMessageQueue(context, "The message does not contain the NServiceBus.CorrelationId header.");
-            }
-
+            
             var props = new Dictionary<string, string> { ["Site"] = sourceSite };
 
             //If there is a reply-to header, substitute it with the gateway queue
             if (context.Headers.TryGetValue(Headers.ReplyToAddress, out replyTo))
             {
                 props["ReplyTo"] = replyTo;
-                context.Headers[Headers.ReplyToAddress] = wormHoleInstance.TransportAddress;
+                context.Headers[Headers.ReplyToAddress] = outsideEndpoint.TransportAddress;
             }
 
             context.Headers[Headers.CorrelationId] = $"{CorrelationIdHeader}{props.EncodeTLV()}";
@@ -98,26 +105,31 @@ namespace NServiceBus.WormHole.Gateway
             if (context.Headers.TryGetValue("NServiceBus.WormHole.Destination", out destinationAddress)) //In case the source site specified the destination
             {
                 var operation = new TransportOperation(outgoingMessage, new UnicastAddressTag(destinationAddress));
-                return outsidEndpoint.Dispatch(new TransportOperations(operation), new TransportTransaction(), new ContextBag());
+                return outsideEndpoint.Dispatch(new TransportOperations(operation), new TransportTransaction(), new ContextBag());
             }
 
             //Route according to local information
             var qualifiedNames = enclosedTypes.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             var mainType = MessageType.Parse(qualifiedNames.First());
 
-            var routes = router.Route(mainType, i => outsidEndpoint.ToTransportAddress(LogicalAddress.CreateRemoteAddress(i)));
+            var routes = router.Route(mainType, i => outsideEndpoint.ToTransportAddress(LogicalAddress.CreateRemoteAddress(i)));
 
-            
             if (routes.Length > 0)
             {
                 var ops = routes.Select(r => new TransportOperation(outgoingMessage, new UnicastAddressTag(r))).ToArray();
-                return outsidEndpoint.Dispatch(new TransportOperations(ops), new TransportTransaction(), new ContextBag());
+                return outsideEndpoint.Dispatch(new TransportOperations(ops), new TransportTransaction(), new ContextBag());
             }
-            return MoveToPoisonMessageQueue(context, $"No route specified for message type(s) {enclosedTypes}");
+            return MoveToPoisonMessageQueue($"No route specified for message type(s) {enclosedTypes}");
         }
 
-        Task OnOutsideMessage(MessageContext context, IStartableRawEndpoint wormHoleEndpoint)
+        Task OnOutsideMessage(MessageContext context, IRawEndpoint wormHoleEndpoint, IRawEndpoint outsideEndpoint)
         {
+            string sourceSite;
+            if (context.Headers.TryGetValue("NServiceBus.WormHole.SourceSite", out sourceSite))
+            {
+                return OnWormHoleMessage(sourceSite, context, outsideEndpoint);
+            }
+
             string destinationSites;
             if (!context.Headers.TryGetValue("NServiceBus.WormHole.DestinationSites", out destinationSites))
             {
@@ -125,31 +137,31 @@ namespace NServiceBus.WormHole.Gateway
                 string correlation;
                 if (!context.Headers.TryGetValue(Headers.CorrelationId, out correlation))
                 {
-                    return MoveToPoisonMessageQueue(context, "The message does not contain site information nor correlation ID.");
+                    return MoveToPoisonMessageQueue("The message does not contain site information nor correlation ID.");
                 }
                 if (!correlation.StartsWith(CorrelationIdHeader))
                 {
-                    return MoveToPoisonMessageQueue(context, $"The correlation ID does not begin with an expected header {CorrelationIdHeader}.");
+                    return MoveToPoisonMessageQueue($"The correlation ID does not begin with an expected header {CorrelationIdHeader}.");
                 }
                 var trimmed = correlation.Substring(CorrelationIdHeader.Length);
                 var props = trimmed.DecodeTLV();
                 if (!props.TryGetValue("Site", out destinationSites))
                 {
-                    return MoveToPoisonMessageQueue(context, "The correlation ID does not contain site information.");
+                    return MoveToPoisonMessageQueue("The correlation ID does not contain site information.");
                 }
                 string originalReplyTo;
                 if (!props.TryGetValue("ReplyTo", out originalReplyTo))
                 {
-                    return MoveToPoisonMessageQueue(context, "The correlation ID does not contain reply address information.");
+                    return MoveToPoisonMessageQueue("The correlation ID does not contain reply address information.");
                 }
                 context.Headers["NServiceBus.WormHole.Destination"] = originalReplyTo;
             }
 
-            var siteList = destinationSites.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries);
+            var siteList = destinationSites.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             var siteAddresses = siteList.Select(ResolveAddress).ToArray();
             if (siteAddresses.Contains(null))
             {
-                return MoveToPoisonMessageQueue(context, $"Cannot resolve addresses of one or more sites: {sites}.");
+                return MoveToPoisonMessageQueue($"Cannot resolve addresses of one or more sites: {string.Join(",", siteList)}.");
             }
 
             context.Headers.Remove("NServiceBus.WormHole.DestinationSites"); //Destination site not relevant
@@ -167,11 +179,9 @@ namespace NServiceBus.WormHole.Gateway
             return siteAddress;
         }
 
-        Task MoveToPoisonMessageQueue(MessageContext context, string message)
+        static Task MoveToPoisonMessageQueue(string message)
         {
-            //TODO
-            Console.WriteLine(message ?? "Boom!");
-            return Task.CompletedTask;
+            throw new GatewayException(message);
         }
 
         public async Task Stop()
@@ -183,6 +193,39 @@ namespace NServiceBus.WormHole.Gateway
             //Stop the transport
             await wormHoleStoppable.Stop().ConfigureAwait(false);
             await outsideStoppable.Stop().ConfigureAwait(false);
+        }
+
+        class OutsideErrorHandlingPolicy : IErrorHandlingPolicy
+        {
+            string errorQueue;
+            int immediateRetryCount;
+
+            public OutsideErrorHandlingPolicy(string errorQueue, int immediateRetryCount)
+            {
+                this.errorQueue = errorQueue;
+                this.immediateRetryCount = immediateRetryCount;
+            }
+
+            public Task<ErrorHandleResult> OnError(IErrorHandlingPolicyContext handlingContext, IDispatchMessages dispatcher)
+            {
+                if (handlingContext.Error.Exception is GatewayException)
+                {
+                    return handlingContext.MoveToErrorQueue(errorQueue);
+                }
+                if (handlingContext.Error.ImmediateProcessingFailures < immediateRetryCount)
+                {
+                    return Task.FromResult(ErrorHandleResult.RetryRequired);
+                }
+                return handlingContext.MoveToErrorQueue(errorQueue);
+            }
+        }
+
+        class GatewayErrorHandlingPolicy : IErrorHandlingPolicy
+        {
+            public Task<ErrorHandleResult> OnError(IErrorHandlingPolicyContext handlingContext, IDispatchMessages dispatcher)
+            {
+                return Task.FromResult(ErrorHandleResult.RetryRequired);
+            }
         }
     }
 }

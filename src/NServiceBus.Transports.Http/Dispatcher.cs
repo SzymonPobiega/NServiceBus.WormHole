@@ -42,7 +42,7 @@ namespace NServiceBus.Transports.Http
                 {
                     return;
                 }
-                if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
+                if (response.StatusCode == HttpStatusCode.ServiceUnavailable) //Immediare retry
                 {
                     retries++;
                 }

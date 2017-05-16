@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GatewayException.cs" />
     <Compile Include="IStartableWormHoleGateway.cs" />
     <Compile Include="IWormHoleGateway.cs" />
     <Compile Include="TypeLengthValueEncoder.cs" />
