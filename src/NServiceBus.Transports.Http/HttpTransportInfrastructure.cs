@@ -28,7 +28,7 @@ namespace NServiceBus.Transports.Http
         public override TransportSendInfrastructure ConfigureSendInfrastructure()
         {
             return new TransportSendInfrastructure(
-                () => new Dispatcher(), 
+                () => new Dispatcher(addressParser), 
                 () => Task.FromResult(StartupCheckResult.Success));
         }
 
@@ -44,21 +44,7 @@ namespace NServiceBus.Transports.Http
 
         public override string ToTransportAddress(LogicalAddress logicalAddress)
         {
-            string host;
-            if (!logicalAddress.EndpointInstance.Properties.TryGetValue("Host", out host))
-            {
-                host = RuntimeEnvironment.MachineName;
-            }
-
-            var discriminatorPart = logicalAddress.EndpointInstance.Discriminator != null
-                ? "-" + logicalAddress.EndpointInstance.Discriminator
-                : "";
-
-            var qualifierPart = logicalAddress.Qualifier != null
-                ? "/" + logicalAddress.Qualifier
-                : "";
-
-            return $"http://{host}:7777/{logicalAddress.EndpointInstance.Endpoint}{discriminatorPart}{qualifierPart}";
+            return addressParser.GenerateAddress(logicalAddress);
         }
 
         public override IEnumerable<Type> DeliveryConstraints => new Type[0];

@@ -11,10 +11,12 @@ namespace NServiceBus.Transports.Http
 
     class Dispatcher : IDispatchMessages, IDisposable
     {
+        AddressParser addressParser;
         HttpClient client;
 
-        public Dispatcher()
+        public Dispatcher(AddressParser addressParser)
         {
+            this.addressParser = addressParser;
             client = new HttpClient();
         }
 
@@ -52,17 +54,9 @@ namespace NServiceBus.Transports.Http
             }
         }
 
-        static HttpRequestMessage CreateRequestMessage(UnicastTransportOperation op)
+        HttpRequestMessage CreateRequestMessage(UnicastTransportOperation op)
         {
-            string prefix;
-            if (!op.Destination.StartsWith("http://"))
-            {
-                prefix = $"http://{RuntimeEnvironment.MachineName}:7777/{op.Destination}";
-            }
-            else
-            {
-                prefix = op.Destination.TrimEnd('/');
-            }
+            var prefix = addressParser.ParseAddress(op.Destination);
             var request = new HttpRequestMessage(HttpMethod.Post, prefix + "/" + op.Message.MessageId);
             request.Content = new ByteArrayContent(op.Message.Body);
             foreach (var header in op.Message.Headers)
