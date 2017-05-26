@@ -165,8 +165,10 @@ namespace NServiceBus.WormHole.Gateway
 
             var router = new MessageRouter(RoutingTable, EndpointInstances, DistributionPolicy);
 
-            return new WormHoleGateway<TLocalTransport, TWormHoleTransport>(localQueueName, site, router, sites, ErrorQueue,
-                localTransportCustomization, tunnelTransportCustomization);
+            return new WormHoleGateway<TLocalTransport, TWormHoleTransport>(localQueueName, 
+                new TunnelMessageHandler(router), 
+                new SiteMessageHandler(site, sites), 
+                ErrorQueue, localTransportCustomization, tunnelTransportCustomization);
         }
 
         /// <summary>

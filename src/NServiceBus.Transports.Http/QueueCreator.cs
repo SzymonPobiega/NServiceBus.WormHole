@@ -7,6 +7,11 @@ namespace NServiceBus.Transports.Http
 
     class QueueCreator : ICreateQueues
     {
+        public QueueCreator(AddressParser addressParser)
+        {
+            this.addressParser = addressParser;
+        }
+
         public Task CreateQueueIfNecessary(QueueBindings queueBindings, string identity)
         {
             SecurityIdentifier sid;
@@ -17,16 +22,19 @@ namespace NServiceBus.Transports.Http
             else
             {
                 var account = new NTAccount(identity);
-                sid = (SecurityIdentifier)account.Translate(typeof(SecurityIdentifier));
+                sid = (SecurityIdentifier) account.Translate(typeof(SecurityIdentifier));
             }
 
             foreach (var receivingAddress in queueBindings.ReceivingAddresses)
             {
-                var reservation = new UrlReservation(receivingAddress + "/", sid);
+                var parsedAddress = addressParser.ParseAddress(receivingAddress);
+                var reservation = new UrlReservation(parsedAddress + "/", sid);
                 reservation.Create();
             }
 
             return Task.CompletedTask;
         }
+
+        AddressParser addressParser;
     }
 }

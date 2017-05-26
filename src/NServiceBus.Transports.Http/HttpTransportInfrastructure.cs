@@ -21,7 +21,7 @@ namespace NServiceBus.Transports.Http
         {
             return new TransportReceiveInfrastructure(
                 () => new MessagePump(), 
-                () => new QueueCreator(), 
+                () => new QueueCreator(addressParser), 
                 () => Task.FromResult(StartupCheckResult.Success));
         }
 

@@ -53,7 +53,6 @@
     <Compile Include="GatewayException.cs" />
     <Compile Include="IStartableWormHoleGateway.cs" />
     <Compile Include="IWormHoleGateway.cs" />
-    <Compile Include="TypeLengthValueEncoder.cs" />
     <Compile Include="MessageRouter.cs" />
     <Compile Include="RoutingTable.cs" />
     <Compile Include="RoutingTableEntry.cs" />
@@ -61,6 +60,8 @@
     <Compile Include="MessageTypeRange.cs" />
     <Compile Include="MessageTypeSpecification.cs" />
     <Compile Include="RouteGroup.cs" />
+    <Compile Include="SiteMessageHandler.cs" />
+    <Compile Include="TunnelMessageHandler.cs" />
     <Compile Include="WormHoleGateway.cs" />
     <Compile Include="InternalsVisibleTo.cs" />
     <Compile Include="WormHoleGatewayConfiguration.cs" />
