@@ -22,7 +22,6 @@
 	  <dependency id="Microsoft.Extensions.Logging.Abstractions" version="[1.1.0, 2.0.0)" />
 	  <dependency id="Microsoft.Extensions.Primitives" version="[1.1.0, 2.0.0)" />
 	  <dependency id="Microsoft.Net.Http.Server" version="[1.1.0, 2.0.0)" />
-	  <dependency id="NETStandard.Library" version="[1.6.1, 2.0.0)" />
       <dependency id="NServiceBus" version="[6.2.0, 7.0.0)" />
     </dependencies>
   </metadata>

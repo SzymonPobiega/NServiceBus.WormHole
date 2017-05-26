@@ -10,8 +10,11 @@ namespace NServiceBus.Transports.Http
 
     class HttpTransportInfrastructure : TransportInfrastructure
     {
+        AddressParser addressParser;
+
         public HttpTransportInfrastructure(SettingsHolder settings, string connectionString)
         {
+            addressParser = new AddressParser(7777, RuntimeEnvironment.MachineName);
         }
 
         public override TransportReceiveInfrastructure ConfigureReceiveInfrastructure()

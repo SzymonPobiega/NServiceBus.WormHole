@@ -1,13 +1,31 @@
 namespace NServiceBus.Transports.Http
 {
+    using System.Security.Principal;
     using System.Threading.Tasks;
+    using ServiceControlInstaller.Engine.UrlAcl;
     using Transport;
 
     class QueueCreator : ICreateQueues
     {
         public Task CreateQueueIfNecessary(QueueBindings queueBindings, string identity)
         {
-            //TODO: This should probably create url ACLs.
+            SecurityIdentifier sid;
+            if (identity == null)
+            {
+                sid = WindowsIdentity.GetCurrent().User;
+            }
+            else
+            {
+                var account = new NTAccount(identity);
+                sid = (SecurityIdentifier)account.Translate(typeof(SecurityIdentifier));
+            }
+
+            foreach (var receivingAddress in queueBindings.ReceivingAddresses)
+            {
+                var reservation = new UrlReservation(receivingAddress + "/", sid);
+                reservation.Create();
+            }
+
             return Task.CompletedTask;
         }
     }
