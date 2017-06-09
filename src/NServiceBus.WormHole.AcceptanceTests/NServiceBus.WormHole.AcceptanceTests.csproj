@@ -7,8 +7,8 @@
     <ProjectGuid>{E2626E98-C1FC-4514-BEE1-6A9260F99B98}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NServiceBus.WormHole.AcceptanceTests</RootNamespace>
-    <AssemblyName>NServiceBus.WormHole.AcceptanceTests</AssemblyName>
+    <RootNamespace>NServiceBus.Wormhole.AcceptanceTests</RootNamespace>
+    <AssemblyName>NServiceBus.Wormhole.AcceptanceTests</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -140,7 +140,6 @@
     <Compile Include="Infrastructure\EndpointTemplates\EndpointCustomizationConfigurationExtensions.cs" />
     <Compile Include="Infrastructure\EndpointTemplates\IConfigureEndpointTestExecution.cs" />
     <Compile Include="Infrastructure\EndpointTemplates\ServerWithNoDefaultPersistenceDefinitions.cs" />
-    <Compile Include="Infrastructure\IServiceControl.cs" />
     <Compile Include="Infrastructure\NServiceBusAcceptanceTest.cs" />
     <Compile Include="Infrastructure\ScenarioDescriptors\EnvironmentHelper.cs" />
     <Compile Include="Infrastructure\ScenarioDescriptors\TypeScanner.cs" />
@@ -155,13 +154,13 @@
       <Project>{ea028d3a-a64c-4214-995f-48c075e02b4a}</Project>
       <Name>NServiceBus.Transports.Http</Name>
     </ProjectReference>
-    <ProjectReference Include="..\NServiceBus.WormHole.Gateway\NServiceBus.WormHole.Gateway.csproj">
+    <ProjectReference Include="..\NServiceBus.WormHole.Gateway\NServiceBus.Wormhole.Gateway.csproj">
       <Project>{f9bccc2d-4f86-4c1d-90df-3ba29f026a36}</Project>
-      <Name>NServiceBus.WormHole.Gateway</Name>
+      <Name>NServiceBus.Wormhole.Gateway</Name>
     </ProjectReference>
-    <ProjectReference Include="..\NServiceBus.WormHole\NServiceBus.WormHole.csproj">
+    <ProjectReference Include="..\NServiceBus.WormHole\NServiceBus.Wormhole.csproj">
       <Project>{86d000a5-f7b3-490f-9023-af48290cf26c}</Project>
-      <Name>NServiceBus.WormHole</Name>
+      <Name>NServiceBus.Wormhole</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

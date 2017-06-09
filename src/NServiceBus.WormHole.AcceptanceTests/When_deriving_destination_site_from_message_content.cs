@@ -3,8 +3,8 @@ using NServiceBus;
 using NServiceBus.AcceptanceTesting;
 using NServiceBus.AcceptanceTests;
 using NServiceBus.AcceptanceTests.EndpointTemplates;
-using NServiceBus.WormHole;
-using NServiceBus.WormHole.Gateway;
+using NServiceBus.Wormhole;
+using NServiceBus.Wormhole.Gateway;
 using NUnit.Framework;
 using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
 
@@ -62,7 +62,7 @@ public class When_deriving_destination_site_from_message_content : NServiceBusAc
         {
             EndpointSetup<DefaultServer>(c =>
             {
-                c.UseWormHoleGateway("SiteA").RouteToSite<MyMessage>(m => m.Site);
+                c.UseWormholeGateway("SiteA").RouteToSite<MyMessage>(m => m.Site);
             });
         }
     }

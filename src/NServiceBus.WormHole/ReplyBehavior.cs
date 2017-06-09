@@ -1,4 +1,4 @@
-namespace NServiceBus.WormHole
+namespace NServiceBus.Wormhole
 {
     using System;
     using System.Threading.Tasks;
@@ -18,11 +18,11 @@ namespace NServiceBus.WormHole
                 return next();
             }
 
-            if (incomingMessage.Headers.TryGetValue("NServiceBus.WormHole.SourceSite", out sourceSite)
-                && incomingMessage.Headers.TryGetValue("NServiceBus.WormHole.ReplyToAddress", out ultimateReplyTo))
+            if (incomingMessage.Headers.TryGetValue("NServiceBus.Wormhole.SourceSite", out sourceSite)
+                && incomingMessage.Headers.TryGetValue("NServiceBus.Wormhole.ReplyToAddress", out ultimateReplyTo))
             {
-                context.Headers["NServiceBus.WormHole.DestinationSites"] = sourceSite;
-                context.Headers["NServiceBus.WormHole.Destination"] = ultimateReplyTo;
+                context.Headers["NServiceBus.Wormhole.DestinationSites"] = sourceSite;
+                context.Headers["NServiceBus.Wormhole.Destination"] = ultimateReplyTo;
             }
             return next();
         }

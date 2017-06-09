@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NServiceBus.WormHole.Gateway
+namespace NServiceBus.Wormhole.Gateway
 {
     /// <summary>
     /// Represents a CLR type.

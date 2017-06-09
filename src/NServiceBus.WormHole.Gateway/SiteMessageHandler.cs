@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.WormHole.Gateway
+﻿namespace NServiceBus.Wormhole.Gateway
 {
     using System;
     using System.Collections.Generic;
@@ -19,9 +19,9 @@
         public Task Handle(MessageContext context, IDispatchMessages tunnelDispatcher)
         {
             string destinationSites;
-            if (!context.Headers.TryGetValue("NServiceBus.WormHole.DestinationSites", out destinationSites))
+            if (!context.Headers.TryGetValue("NServiceBus.Wormhole.DestinationSites", out destinationSites))
             {
-                throw new GatewayException("Message has no 'NServiceBus.WormHole.DestinationSites' header.");
+                throw new GatewayException("Message has no 'NServiceBus.Wormhole.DestinationSites' header.");
             }
 
             var siteList = destinationSites.Split(new[]
@@ -34,8 +34,8 @@
                 throw new GatewayException($"Cannot resolve addresses of one or more sites: {string.Join(",", siteList)}.");
             }
 
-            context.Headers.Remove("NServiceBus.WormHole.DestinationSites"); //Destination site not relevant
-            context.Headers["NServiceBus.WormHole.SourceSite"] = thisSite; //Will be used when reply-to
+            context.Headers.Remove("NServiceBus.Wormhole.DestinationSites"); //Destination site not relevant
+            context.Headers["NServiceBus.Wormhole.SourceSite"] = thisSite; //Will be used when reply-to
 
             var outgoingMessage = new OutgoingMessage(context.MessageId, context.Headers, context.Body);
             var ops = siteAddresses.Select(a => new TransportOperation(outgoingMessage, new UnicastAddressTag(a))).ToArray();

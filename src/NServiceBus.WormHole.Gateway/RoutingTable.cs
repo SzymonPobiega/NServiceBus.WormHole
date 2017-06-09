@@ -1,6 +1,6 @@
 ﻿using NServiceBus.Routing;
 
-namespace NServiceBus.WormHole.Gateway
+namespace NServiceBus.Wormhole.Gateway
 {
     using System.Collections.Generic;
     using System.Linq;

@@ -1,4 +1,4 @@
-namespace NServiceBus.WormHole.Gateway
+namespace NServiceBus.Wormhole.Gateway
 {
     using System;
     using System.Linq;
@@ -30,13 +30,13 @@ namespace NServiceBus.WormHole.Gateway
             //If there is a reply-to header, substitute it with the gateway queue
             if (context.Headers.TryGetValue(Headers.ReplyToAddress, out replyTo))
             {
-                context.Headers["NServiceBus.WormHole.ReplyToAddress"] = replyTo;
+                context.Headers["NServiceBus.Wormhole.ReplyToAddress"] = replyTo;
                 context.Headers[Headers.ReplyToAddress] = siteDispatcher.TransportAddress;
             }
 
             var outgoingMessage = new OutgoingMessage(context.MessageId, context.Headers, context.Body);
 
-            if (context.Headers.TryGetValue("NServiceBus.WormHole.Destination", out destinationAddress)) //In case the source site specified the destination
+            if (context.Headers.TryGetValue("NServiceBus.Wormhole.Destination", out destinationAddress)) //In case the source site specified the destination
             {
                 var operation = new TransportOperation(outgoingMessage, new UnicastAddressTag(destinationAddress));
                 return siteDispatcher.Dispatch(new TransportOperations(operation), new TransportTransaction(), new ContextBag());

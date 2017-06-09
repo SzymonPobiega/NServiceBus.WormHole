@@ -1,12 +1,12 @@
-namespace NServiceBus.WormHole.Gateway
+namespace NServiceBus.Wormhole.Gateway
 {
     using System.Threading.Tasks;
 
     /// <summary>
     /// Represents a worm hole gateway instance ready to start.
     /// </summary>
-    public interface IStartableWormHoleGateway
+    public interface IStartableWormholeGateway
     {
-        Task<IWormHoleGateway> Start();
+        Task<IWormholeGateway> Start();
     }
 }

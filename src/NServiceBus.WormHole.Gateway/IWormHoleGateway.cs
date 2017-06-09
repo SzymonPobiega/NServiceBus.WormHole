@@ -1,11 +1,11 @@
 using System.Threading.Tasks;
 
-namespace NServiceBus.WormHole.Gateway
+namespace NServiceBus.Wormhole.Gateway
 {
     /// <summary>
     /// Represents a running worm hole gateway.
     /// </summary>
-    public interface IWormHoleGateway
+    public interface IWormholeGateway
     {
         Task Stop();
     }

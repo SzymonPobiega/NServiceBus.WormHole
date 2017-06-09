@@ -3,8 +3,8 @@ using NServiceBus;
 using NServiceBus.AcceptanceTesting;
 using NServiceBus.AcceptanceTests;
 using NServiceBus.AcceptanceTests.EndpointTemplates;
-using NServiceBus.WormHole;
-using NServiceBus.WormHole.Gateway;
+using NServiceBus.Wormhole;
+using NServiceBus.Wormhole.Gateway;
 using NUnit.Framework;
 using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
 
@@ -46,7 +46,7 @@ public class When_replying_to_a_message : NServiceBusAcceptanceTest
         {
             EndpointSetup<DefaultServer>(c =>
             {
-                c.UseWormHoleGateway("SiteA").RouteToSite<MyRequest>("SiteB");
+                c.UseWormholeGateway("SiteA").RouteToSite<MyRequest>("SiteB");
             });
         }
 
@@ -73,7 +73,7 @@ public class When_replying_to_a_message : NServiceBusAcceptanceTest
         {
             EndpointSetup<DefaultServer>(c =>
             {
-                c.UseWormHoleGateway("SiteB");
+                c.UseWormholeGateway("SiteB");
             });
         }
 

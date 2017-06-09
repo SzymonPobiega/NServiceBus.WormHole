@@ -4,14 +4,14 @@ using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.AcceptanceTesting.Support;
 using NServiceBus.Transports.Http;
-using NServiceBus.WormHole.Gateway;
+using NServiceBus.Wormhole.Gateway;
 
 class GatewayComponent : IComponentBehavior
 {
     string siteName;
-    Action<WormHoleGatewayConfiguration<MsmqTransport, HttpTransport>> configAction;
+    Action<WormholeGatewayConfiguration<MsmqTransport, HttpTransport>> configAction;
 
-    public GatewayComponent(string siteName, Action<WormHoleGatewayConfiguration<MsmqTransport, HttpTransport>> configAction)
+    public GatewayComponent(string siteName, Action<WormholeGatewayConfiguration<MsmqTransport, HttpTransport>> configAction)
     {
         this.siteName = siteName;
         this.configAction = configAction;
@@ -19,7 +19,7 @@ class GatewayComponent : IComponentBehavior
 
     public Task<ComponentRunner> CreateRunner(RunDescriptor run)
     {
-        var config = new WormHoleGatewayConfiguration<MsmqTransport, HttpTransport>(siteName, siteName);
+        var config = new WormholeGatewayConfiguration<MsmqTransport, HttpTransport>(siteName, siteName);
         configAction(config);
         var adapter = config.Build();
         
@@ -28,10 +28,10 @@ class GatewayComponent : IComponentBehavior
 
     class Runner : ComponentRunner
     {
-        IStartableWormHoleGateway gateway;
-        IWormHoleGateway runningGateway;
+        IStartableWormholeGateway gateway;
+        IWormholeGateway runningGateway;
 
-        public Runner(IStartableWormHoleGateway gateway, string siteName)
+        public Runner(IStartableWormholeGateway gateway, string siteName)
         {
             this.gateway = gateway;
             this.Name = siteName;

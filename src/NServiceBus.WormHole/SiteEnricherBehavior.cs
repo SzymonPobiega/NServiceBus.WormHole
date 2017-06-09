@@ -1,16 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using NServiceBus.Pipeline;
-
-namespace NServiceBus.WormHole
+namespace NServiceBus.Wormhole
 {
+    using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
+    using Pipeline;
 
     class SiteEnricherBehavior : Behavior<IOutgoingSendContext>
     {
-        Dictionary<Type, Func<object, string[]>> siteMap;
-
         public SiteEnricherBehavior(Dictionary<Type, Func<object, string[]>> siteMap)
         {
             this.siteMap = siteMap;
@@ -26,9 +23,11 @@ namespace NServiceBus.WormHole
                 {
                     throw new Exception("Site name cannot contain a semicolon.");
                 }
-                context.Headers["NServiceBus.WormHole.DestinationSites"] = string.Join(";", sites);
+                context.Headers["NServiceBus.Wormhole.DestinationSites"] = string.Join(";", sites);
             }
             return next();
         }
+
+        Dictionary<Type, Func<object, string[]>> siteMap;
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NServiceBus.Routing;
 
-namespace NServiceBus.WormHole.Gateway
+namespace NServiceBus.Wormhole.Gateway
 {
     class MessageRouter
     {

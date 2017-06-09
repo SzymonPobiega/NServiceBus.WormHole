@@ -7,8 +7,8 @@
     <ProjectGuid>{86D000A5-F7B3-490F-9023-AF48290CF26C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NServiceBus.WormHole</RootNamespace>
-    <AssemblyName>NServiceBus.WormHole</AssemblyName>
+    <RootNamespace>NServiceBus.Wormhole</RootNamespace>
+    <AssemblyName>NServiceBus.Wormhole</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -49,9 +49,9 @@
     <Compile Include="ReplyBehavior.cs" />
     <Compile Include="InternalsVisibleTo.cs" />
     <Compile Include="SiteEnricherBehavior.cs" />
-    <Compile Include="WormHoleRoutingFeature.cs" />
-    <Compile Include="WormHoleRoutingSettings.cs" />
-    <Compile Include="WormHoleRoutingExtensions.cs" />
+    <Compile Include="WormholeRoutingExtensions.cs" />
+    <Compile Include="WormholeRoutingFeature.cs" />
+    <Compile Include="WormholeRoutingSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

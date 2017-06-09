@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.WormHole.Gateway
+﻿namespace NServiceBus.Wormhole.Gateway
 {
     using System;
     using System.Threading.Tasks;
@@ -8,48 +8,48 @@
     using Routing;
     using Transport;
 
-    class WormHoleGateway<TLocalTransport, TWormHoleTransport> : IWormHoleGateway, IStartableWormHoleGateway
+    class WormholeGateway<TLocalTransport, TWormholeTransport> : IWormholeGateway, IStartableWormholeGateway
         where TLocalTransport : TransportDefinition, new()
-        where TWormHoleTransport : TransportDefinition, new()
+        where TWormholeTransport : TransportDefinition, new()
     {
-        internal WormHoleGateway(string name, TunnelMessageHandler tunnelMessageHandler, SiteMessageHandler siteMessageHandler, string poisonMessageQueue,
+        internal WormholeGateway(string name, TunnelMessageHandler tunnelMessageHandler, SiteMessageHandler siteMessageHandler, string poisonMessageQueue,
             Action<RawEndpointConfiguration, TransportExtensions<TLocalTransport>> localEndpointCustomization,
-            Action<RawEndpointConfiguration, TransportExtensions<TWormHoleTransport>> wormholeEndpointCustomization)
+            Action<RawEndpointConfiguration, TransportExtensions<TWormholeTransport>> WormholeEndpointCustomization)
         {
             this.name = name;
             this.poisonMessageQueue = poisonMessageQueue;
             this.localEndpointCustomization = localEndpointCustomization;
-            this.wormholeEndpointCustomization = wormholeEndpointCustomization;
+            this.WormholeEndpointCustomization = WormholeEndpointCustomization;
             this.tunnelMessageHandler = tunnelMessageHandler;
             this.siteMessageHandler = siteMessageHandler;
         }
 
-        public async Task<IWormHoleGateway> Start()
+        public async Task<IWormholeGateway> Start()
         {
             IStartableRawEndpoint outsideStartable = null;
-            IStartableRawEndpoint wormHoleStartable = null;
+            IStartableRawEndpoint WormholeStartable = null;
 
-            var outsideConfig = RawEndpointConfiguration.Create(name, (c, _) => OnOutsideMessage(c, wormHoleStartable, outsideStartable), poisonMessageQueue);
-            var wormHoleConfig = RawEndpointConfiguration.Create(name, (c, _) => OnWormHoleMessage(c, outsideStartable), poisonMessageQueue);
+            var outsideConfig = RawEndpointConfiguration.Create(name, (c, _) => OnOutsideMessage(c, WormholeStartable, outsideStartable), poisonMessageQueue);
+            var WormholeConfig = RawEndpointConfiguration.Create(name, (c, _) => OnWormholeMessage(c, outsideStartable), poisonMessageQueue);
 
             outsideConfig.AutoCreateQueue();
-            wormHoleConfig.AutoCreateQueue();
+            WormholeConfig.AutoCreateQueue();
 
             outsideConfig.CustomErrorHandlingPolicy(new OutsideErrorHandlingPolicy(poisonMessageQueue, 5));
-            wormHoleConfig.CustomErrorHandlingPolicy(new GatewayErrorHandlingPolicy());
+            WormholeConfig.CustomErrorHandlingPolicy(new GatewayErrorHandlingPolicy());
 
             var outsideTransport = outsideConfig.UseTransport<TLocalTransport>();
             localEndpointCustomization(outsideConfig, outsideTransport);
 
-            var wormHoleTransport = wormHoleConfig.UseTransport<TWormHoleTransport>();
-            wormholeEndpointCustomization(wormHoleConfig, wormHoleTransport);
+            var WormholeTransport = WormholeConfig.UseTransport<TWormholeTransport>();
+            WormholeEndpointCustomization(WormholeConfig, WormholeTransport);
 
             outsideStartable = await RawEndpoint.Create(outsideConfig).ConfigureAwait(false);
-            wormHoleStartable = await RawEndpoint.Create(wormHoleConfig).ConfigureAwait(false);
+            WormholeStartable = await RawEndpoint.Create(WormholeConfig).ConfigureAwait(false);
 
             //Start receiving
             localInstance = await outsideStartable.Start().ConfigureAwait(false);
-            wormHoleInstance = await wormHoleStartable.Start().ConfigureAwait(false);
+            WormholeInstance = await WormholeStartable.Start().ConfigureAwait(false);
 
             return this;
         }
@@ -57,40 +57,40 @@
         public async Task Stop()
         {
             //Ensure no more messages are in-flight
-            var wormHoleStoppable = await wormHoleInstance.StopReceiving().ConfigureAwait(false);
+            var WormholeStoppable = await WormholeInstance.StopReceiving().ConfigureAwait(false);
             var outsideStoppable = await localInstance.StopReceiving().ConfigureAwait(false);
 
             //Stop the transport
-            await wormHoleStoppable.Stop().ConfigureAwait(false);
+            await WormholeStoppable.Stop().ConfigureAwait(false);
             await outsideStoppable.Stop().ConfigureAwait(false);
         }
 
-        static Task OnWormHoleMessage(MessageContext context, IRawEndpoint outsideEndpoint)
+        static Task OnWormholeMessage(MessageContext context, IRawEndpoint outsideEndpoint)
         {
             var outgoingMessage = new OutgoingMessage(context.MessageId, context.Headers, context.Body);
             var op = new TransportOperation(outgoingMessage, new UnicastAddressTag(outsideEndpoint.TransportAddress));
             return outsideEndpoint.Dispatch(new TransportOperations(op), new TransportTransaction(), new ContextBag());
         }
 
-        Task OnOutsideMessage(MessageContext context, IRawEndpoint wormHoleEndpoint, IRawEndpoint outsideEndpoint)
+        Task OnOutsideMessage(MessageContext context, IRawEndpoint WormholeEndpoint, IRawEndpoint outsideEndpoint)
         {
             string sourceSite;
-            if (context.Headers.TryGetValue("NServiceBus.WormHole.SourceSite", out sourceSite))
+            if (context.Headers.TryGetValue("NServiceBus.Wormhole.SourceSite", out sourceSite))
             {
                 return tunnelMessageHandler.Handle(context, outsideEndpoint);
             }
-            return siteMessageHandler.Handle(context, wormHoleEndpoint);
+            return siteMessageHandler.Handle(context, WormholeEndpoint);
         }
 
-        ILog log = LogManager.GetLogger(typeof(WormHoleGateway<,>));
+        ILog log = LogManager.GetLogger(typeof(WormholeGateway<,>));
         string name;
         TunnelMessageHandler tunnelMessageHandler;
         SiteMessageHandler siteMessageHandler;
         string poisonMessageQueue;
         Action<RawEndpointConfiguration, TransportExtensions<TLocalTransport>> localEndpointCustomization;
-        Action<RawEndpointConfiguration, TransportExtensions<TWormHoleTransport>> wormholeEndpointCustomization;
+        Action<RawEndpointConfiguration, TransportExtensions<TWormholeTransport>> WormholeEndpointCustomization;
         IReceivingRawEndpoint localInstance;
-        IReceivingRawEndpoint wormHoleInstance;
+        IReceivingRawEndpoint WormholeInstance;
 
         class OutsideErrorHandlingPolicy : IErrorHandlingPolicy
         {

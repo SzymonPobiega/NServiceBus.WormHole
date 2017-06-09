@@ -7,7 +7,7 @@ using NServiceBus.AcceptanceTests;
 using NServiceBus.AcceptanceTests.EndpointTemplates;
 using NServiceBus.Routing;
 using NServiceBus.Settings;
-using NServiceBus.WormHole;
+using NServiceBus.Wormhole;
 using NUnit.Framework;
 using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
 
@@ -26,7 +26,7 @@ public class When_using_sender_side_distribution : NServiceBusAcceptanceTest
             }))
             .WithComponent(new GatewayComponent("SiteB", c =>
             {
-                c.ForwardToEndpoint("NServiceBus.WormHole.AcceptanceTests", ReceiverEndpoint);
+                c.ForwardToEndpoint("NServiceBus.Wormhole.AcceptanceTests", ReceiverEndpoint);
                 c.EndpointInstances.AddOrReplaceInstances("key", new List<EndpointInstance>
                 {
                     new EndpointInstance(ReceiverEndpoint, "1"),
@@ -57,7 +57,7 @@ public class When_using_sender_side_distribution : NServiceBusAcceptanceTest
         {
             EndpointSetup<DefaultServer>(c =>
             {
-                c.UseWormHoleGateway("SiteA").RouteToSite<MyMessage>("SiteB");
+                c.UseWormholeGateway("SiteA").RouteToSite<MyMessage>("SiteB");
             });
         }
     }

@@ -1,4 +1,4 @@
-namespace NServiceBus.WormHole.Gateway
+namespace NServiceBus.Wormhole.Gateway
 {
     using System;
 

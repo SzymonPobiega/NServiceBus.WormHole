@@ -3,7 +3,7 @@ using NServiceBus;
 using NServiceBus.AcceptanceTesting;
 using NServiceBus.AcceptanceTests;
 using NServiceBus.AcceptanceTests.EndpointTemplates;
-using NServiceBus.WormHole;
+using NServiceBus.Wormhole;
 using NUnit.Framework;
 using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
 
@@ -20,7 +20,7 @@ public class When_forwarding_all_messages_in_assembly : NServiceBusAcceptanceTes
             }))
             .WithComponent(new GatewayComponent("SiteB", c =>
             {
-                c.ForwardToEndpoint("NServiceBus.WormHole.AcceptanceTests", 
+                c.ForwardToEndpoint("NServiceBus.Wormhole.AcceptanceTests", 
                     Conventions.EndpointNamingConvention(typeof(Receiver)));
             }))
             .WithEndpoint<Sender>(c => c.When(s => s.Send(new MyMessage())))
@@ -42,7 +42,7 @@ public class When_forwarding_all_messages_in_assembly : NServiceBusAcceptanceTes
         {
             EndpointSetup<DefaultServer>(c =>
             {
-                c.UseWormHoleGateway("SiteA").RouteToSite<MyMessage>("SiteB");
+                c.UseWormholeGateway("SiteA").RouteToSite<MyMessage>("SiteB");
             });
         }
     }
