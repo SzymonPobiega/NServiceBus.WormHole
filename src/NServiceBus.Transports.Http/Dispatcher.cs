@@ -6,7 +6,6 @@ namespace NServiceBus.Transports.Http
     using System.Net.Http;
     using System.Threading.Tasks;
     using Extensibility;
-    using Support;
     using Transport;
 
     class Dispatcher : IDispatchMessages, IDisposable

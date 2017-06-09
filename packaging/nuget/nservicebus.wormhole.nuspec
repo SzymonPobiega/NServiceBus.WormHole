@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
-    <id>NServiceBus.WormHole</id>
-    <title>NServiceBus.WormHole</title>
+    <id>NServiceBus.Wormhole</id>
+    <title>NServiceBus.Wormhole</title>
     <version>$version$</version>
     <authors>Szymon Pobiega</authors>
     <owners>SzymonPobiega</owners>    
-    <projectUrl>https://github.com/SzymonPobiega/NServiceBus.WormHole</projectUrl>
-	<licenseUrl>https://github.com/SzymonPobiega/NServiceBus.WormHole/blob/master/LICENSE</licenseUrl>
-    <iconUrl>https://WormHole.githubusercontent.com/SzymonPobiega/NServiceBus.WormHole/master/icons/worm-hole.png</iconUrl>
+    <projectUrl>https://github.com/SzymonPobiega/NServiceBus.Wormhole</projectUrl>
+	<licenseUrl>https://github.com/SzymonPobiega/NServiceBus.Wormhole/blob/master/LICENSE</licenseUrl>
+    <iconUrl>https://Wormhole.githubusercontent.com/SzymonPobiega/NServiceBus.Wormhole/master/icons/worm-hole.png</iconUrl>
     <requireLicenseAcceptance>$requireLicenseAcceptance$</requireLicenseAcceptance>
     <description>Allows to connect NServiceBus endpoints in different geographical locations</description>
     <releaseNotes></releaseNotes>
@@ -23,6 +23,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="..\..\binaries\NServiceBus.WormHole.???" target="lib\net46" />
+    <file src="..\..\binaries\NServiceBus.Wormhole.???" target="lib\net46" />
   </files>
 </package>
