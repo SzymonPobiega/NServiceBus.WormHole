@@ -1,6 +1,6 @@
 ![Icon](https://raw.github.com/SzymonPobiega/NServiceBus.WormHole/master/icons/worm-hole.png)
 
-# NServiceBus.WormHole
+# NServiceBus.Wormhole
 
 ## Icon
 
