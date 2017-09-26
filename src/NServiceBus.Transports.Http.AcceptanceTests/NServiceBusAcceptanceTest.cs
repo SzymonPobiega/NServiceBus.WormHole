@@ -15,7 +15,7 @@ namespace NServiceBus.AcceptanceTests
         {
             var config = RawEndpointConfiguration.Create("error", (context, messages) =>
             {
-                return Task.CompletedTask;
+                return Task.FromResult(0);
             }, "poison");
             config.UseTransport<HttpTransport>();
 

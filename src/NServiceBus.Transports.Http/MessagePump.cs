@@ -23,7 +23,7 @@ namespace NServiceBus.Transports.Http
             listenCircuitBreaker = new RepeatedFailuresOverTimeCircuitBreaker("Listen", TimeSpan.FromSeconds(30), ex => criticalError.Raise("Failed to listen " + settings.InputQueue, ex));
             receiveCircuitBreaker = new RepeatedFailuresOverTimeCircuitBreaker("Receive", TimeSpan.FromSeconds(30), ex => criticalError.Raise("Failed to receive from " + settings.InputQueue, ex));
 
-            return Task.CompletedTask;
+            return Task.FromResult(0);
         }
 
         public void Start(PushRuntimeSettings limitations)
@@ -85,9 +85,8 @@ namespace NServiceBus.Transports.Http
                 // antecedent task is aborted the continuation will be scheduled. But in this case we don't need to await
                 // the continuation to complete because only really care about the receive operations. The final operation
                 // when shutting down is a clear of the running tasks anyway.
-#pragma warning disable 4014
-                receiveTask.ContinueWith((t, state) =>
-#pragma warning restore 4014
+                // ReSharper disable once UnusedVariable
+                var ignored = receiveTask.ContinueWith((t, state) =>
                 {
                     var receiveTasks = (ConcurrentDictionary<Task, Task>)state;
                     Task toBeRemoved;
@@ -132,7 +131,7 @@ namespace NServiceBus.Transports.Http
             {
                 var length = (int)context.Request.ContentLength.Value;
                 bodyBuffer = new byte[length];
-                await context.Request.Body.ReadAsync(bodyBuffer, 0, length);
+                await context.Request.Body.ReadAsync(bodyBuffer, 0, length).ConfigureAwait(false);
             }
             else
             {

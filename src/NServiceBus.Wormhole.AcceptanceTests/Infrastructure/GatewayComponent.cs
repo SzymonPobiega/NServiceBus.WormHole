@@ -9,9 +9,9 @@ using NServiceBus.Wormhole.Gateway;
 class GatewayComponent : IComponentBehavior
 {
     string siteName;
-    Action<WormholeGatewayConfiguration<MsmqTransport, HttpTransport>> configAction;
+    Action<WormholeGatewayConfiguration<LearningTransport, HttpTransport>> configAction;
 
-    public GatewayComponent(string siteName, Action<WormholeGatewayConfiguration<MsmqTransport, HttpTransport>> configAction)
+    public GatewayComponent(string siteName, Action<WormholeGatewayConfiguration<LearningTransport, HttpTransport>> configAction)
     {
         this.siteName = siteName;
         this.configAction = configAction;
@@ -19,7 +19,7 @@ class GatewayComponent : IComponentBehavior
 
     public Task<ComponentRunner> CreateRunner(RunDescriptor run)
     {
-        var config = new WormholeGatewayConfiguration<MsmqTransport, HttpTransport>(siteName, siteName);
+        var config = new WormholeGatewayConfiguration<LearningTransport, HttpTransport>(siteName, siteName);
         configAction(config);
         var adapter = config.Build();
         

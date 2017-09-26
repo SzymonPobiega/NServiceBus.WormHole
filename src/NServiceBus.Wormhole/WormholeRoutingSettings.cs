@@ -3,12 +3,15 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Configuration.AdvanceExtensibility;
+    using Configuration.AdvancedExtensibility;
     using Settings;
 
+    /// <summary>
+    /// Configures wormhole routing.
+    /// </summary>
     public class WormholeRoutingSettings : ExposeSettings
     {
-        public WormholeRoutingSettings(string gatwayAddress, SettingsHolder settings) : base(settings)
+        internal WormholeRoutingSettings(string gatwayAddress, SettingsHolder settings) : base(settings)
         {
             GatwayAddress = gatwayAddress;
         }

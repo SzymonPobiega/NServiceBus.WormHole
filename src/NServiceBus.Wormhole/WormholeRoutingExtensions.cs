@@ -1,16 +1,19 @@
 ﻿namespace NServiceBus.Wormhole
 {
     using System;
-    using Configuration.AdvanceExtensibility;
+    using Configuration.AdvancedExtensibility;
     using Features;
 
+    /// <summary>
+    /// Enables wormhole gateway.
+    /// </summary>
     public static class WormholeRoutingExtensions
     {
         /// <summary>
-        /// Enables the Worm Hole gateway.
+        /// Enables the wormhole gateway.
         /// </summary>
         /// <param name="config">Endpoint config.</param>
-        /// <param name="gatewayAddress">Worm Hole gateway address.</param>
+        /// <param name="gatewayAddress">Wormhole gateway address.</param>
         public static WormholeRoutingSettings UseWormholeGateway(this EndpointConfiguration config, string gatewayAddress)
         {
             if (gatewayAddress == null)
