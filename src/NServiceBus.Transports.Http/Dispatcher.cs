@@ -13,10 +13,10 @@ namespace NServiceBus.Transports.Http
         AddressParser addressParser;
         HttpClient client;
 
-        public Dispatcher(AddressParser addressParser)
+        public Dispatcher(AddressParser addressParser, HttpClient httpClient)
         {
             this.addressParser = addressParser;
-            client = new HttpClient();
+            client = httpClient;
         }
 
         public async Task Dispatch(TransportOperations outgoingMessages, TransportTransaction transaction, ContextBag context)

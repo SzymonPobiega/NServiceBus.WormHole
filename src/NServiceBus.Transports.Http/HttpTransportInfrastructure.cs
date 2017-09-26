@@ -2,6 +2,7 @@ namespace NServiceBus.Transports.Http
 {
     using System;
     using System.Collections.Generic;
+    using System.Net.Http;
     using System.Threading.Tasks;
     using Routing;
     using Settings;
@@ -10,10 +11,12 @@ namespace NServiceBus.Transports.Http
 
     class HttpTransportInfrastructure : TransportInfrastructure
     {
+        SettingsHolder settings;
         AddressParser addressParser;
 
         public HttpTransportInfrastructure(SettingsHolder settings, string connectionString)
         {
+            this.settings = settings;
             addressParser = new AddressParser(7777, RuntimeEnvironment.MachineName);
         }
 
@@ -27,8 +30,13 @@ namespace NServiceBus.Transports.Http
 
         public override TransportSendInfrastructure ConfigureSendInfrastructure()
         {
+            if (!settings.TryGet("NServiceBus.Transports.Http.HttpClient", out HttpClient client))
+            {
+                client = new HttpClient();
+            }
+
             return new TransportSendInfrastructure(
-                () => new Dispatcher(addressParser), 
+                () => new Dispatcher(addressParser, client), 
                 () => Task.FromResult(StartupCheckResult.Success));
         }
 
