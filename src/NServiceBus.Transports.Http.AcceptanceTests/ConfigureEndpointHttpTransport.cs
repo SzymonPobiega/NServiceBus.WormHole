@@ -6,7 +6,7 @@ using NServiceBus.Transports.Http;
 
 public class ConfigureEndpointHttpTransport : IConfigureEndpointTestExecution
 {
-    HttpClient httpClient = new HttpClient();
+    static HttpClient httpClient = new HttpClient();
 
     public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings, PublisherMetadata publisherMetadata)
     {

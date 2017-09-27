@@ -11,13 +11,22 @@ namespace NServiceBus.Transports.Http
 
     class HttpTransportInfrastructure : TransportInfrastructure
     {
-        SettingsHolder settings;
         AddressParser addressParser;
+        bool ownsClient;
+        HttpClient client;
 
         public HttpTransportInfrastructure(SettingsHolder settings, string connectionString)
         {
-            this.settings = settings;
             addressParser = new AddressParser(7777, RuntimeEnvironment.MachineName);
+            if (settings.TryGet(out HttpClientHolder holder))
+            {
+                client = holder.Client;
+            }
+            else
+            {
+                client = new HttpClient();
+                ownsClient = true;
+            }
         }
 
         public override TransportReceiveInfrastructure ConfigureReceiveInfrastructure()
@@ -30,14 +39,18 @@ namespace NServiceBus.Transports.Http
 
         public override TransportSendInfrastructure ConfigureSendInfrastructure()
         {
-            if (!settings.TryGet("NServiceBus.Transports.Http.HttpClient", out HttpClient client))
-            {
-                client = new HttpClient();
-            }
-
             return new TransportSendInfrastructure(
                 () => new Dispatcher(addressParser, client), 
                 () => Task.FromResult(StartupCheckResult.Success));
+        }
+
+        public override Task Stop()
+        {
+            if (ownsClient)
+            {
+                client.Dispose();
+            }
+            return base.Stop();
         }
 
         public override TransportSubscriptionInfrastructure ConfigureSubscriptionInfrastructure()

@@ -1,5 +1,6 @@
 namespace NServiceBus.AcceptanceTests
 {
+    using System.Net.Http;
     using System.Threading.Tasks;
     using Logging;
     using NUnit.Framework;
@@ -9,6 +10,7 @@ namespace NServiceBus.AcceptanceTests
     public abstract partial class NServiceBusAcceptanceTest
     {
         IReceivingRawEndpoint errorListener;
+        static HttpClient httpClient = new HttpClient();
 
         [SetUp]
         public void StartErrorQueueListener()
@@ -17,7 +19,7 @@ namespace NServiceBus.AcceptanceTests
             {
                 return Task.FromResult(0);
             }, "poison");
-            config.UseTransport<HttpTransport>();
+            config.UseTransport<HttpTransport>().UseHttpClient(httpClient);
 
             LogManager.Use<DefaultFactory>();
             errorListener = RawEndpoint.Start(config).GetAwaiter().GetResult();

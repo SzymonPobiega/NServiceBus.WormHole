@@ -20,7 +20,7 @@ namespace NServiceBus.Transports.Http
                 throw new ArgumentNullException(nameof(client));
             }
 
-            config.GetSettings().Set("NServiceBus.Transports.Http.HttpClient", client);
+            config.GetSettings().Set<HttpClientHolder>(new HttpClientHolder(client));
             return config;
         }
     }

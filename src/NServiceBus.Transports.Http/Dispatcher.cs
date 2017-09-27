@@ -8,7 +8,7 @@ namespace NServiceBus.Transports.Http
     using Extensibility;
     using Transport;
 
-    class Dispatcher : IDispatchMessages, IDisposable
+    class Dispatcher : IDispatchMessages
     {
         AddressParser addressParser;
         HttpClient client;
@@ -32,23 +32,25 @@ namespace NServiceBus.Transports.Http
             var retries = 0;
             while (true)
             {
-                var httpMessage = CreateRequestMessage(operation);
-                if (retries > 0)
+                using (var httpMessage = CreateRequestMessage(operation))
                 {
-                    httpMessage.Headers.Add("X-NSBHttp-ImmediateFailures", retries.ToString(CultureInfo.InvariantCulture));
-                }
-                var response = await client.SendAsync(httpMessage, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    return;
-                }
-                if (response.StatusCode == HttpStatusCode.ServiceUnavailable) //Immediare retry
-                {
-                    retries++;
-                }
-                else
-                {
-                    throw new Exception($"Unexpected status code {response.StatusCode} when sending to {httpMessage.RequestUri}.");
+                    if (retries > 0)
+                    {
+                        httpMessage.Headers.Add("X-NSBHttp-ImmediateFailures", retries.ToString(CultureInfo.InvariantCulture));
+                    }
+                    var response = await client.SendAsync(httpMessage, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+                    if (response.StatusCode == HttpStatusCode.OK)
+                    {
+                        return;
+                    }
+                    if (response.StatusCode == HttpStatusCode.ServiceUnavailable) //Immediare retry
+                    {
+                        retries++;
+                    }
+                    else
+                    {
+                        throw new Exception($"Unexpected status code {response.StatusCode} when sending to {httpMessage.RequestUri}.");
+                    }
                 }
             }
         }
@@ -63,11 +65,6 @@ namespace NServiceBus.Transports.Http
                 request.Headers.Add("X-NSB-" + WebUtility.UrlEncode(header.Key), WebUtility.UrlEncode(header.Value));
             }
             return request;
-        }
-
-        public void Dispose()
-        {
-            client.Dispose();
         }
     }
 }
