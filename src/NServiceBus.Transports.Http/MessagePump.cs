@@ -89,8 +89,7 @@ namespace NServiceBus.Transports.Http
                 var ignored = receiveTask.ContinueWith((t, state) =>
                 {
                     var receiveTasks = (ConcurrentDictionary<Task, Task>)state;
-                    Task toBeRemoved;
-                    receiveTasks.TryRemove(t, out toBeRemoved);
+                    receiveTasks.TryRemove(t, out Task _);
                 }, runningReceiveTasks, TaskContinuationOptions.ExecuteSynchronously);
             }
         }
