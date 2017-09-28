@@ -4,7 +4,7 @@
     using Features;
     using Routing;
 
-    public class WormholeRoutingFeature : Feature
+    class WormholeRoutingFeature : Feature
     {
         protected override void Setup(FeatureConfigurationContext context)
         {

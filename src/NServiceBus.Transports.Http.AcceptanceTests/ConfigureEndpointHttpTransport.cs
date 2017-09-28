@@ -1,26 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.AcceptanceTesting.Support;
-using NServiceBus.AcceptanceTests.ScenarioDescriptors;
 using NServiceBus.Transports.Http;
-
-public class ConfigureScenariosForHttpTransport : IConfigureSupportedScenariosForTestExecution
-{
-    public IEnumerable<Type> UnsupportedScenarioDescriptorTypes { get; } = new[]
-    {
-        typeof(AllTransportsWithCentralizedPubSubSupport),
-        typeof(AllDtcTransports),
-        typeof(AllNativeMultiQueueTransactionTransports)
-    };
-}
 
 public class ConfigureEndpointHttpTransport : IConfigureEndpointTestExecution
 {
+    static HttpClient httpClient = new HttpClient();
+
     public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings, PublisherMetadata publisherMetadata)
     {
-        var transportConfig = configuration.UseTransport<HttpTransport>();
+        var transportConfig = configuration.UseTransport<HttpTransport>().UseHttpClient(httpClient);
         var routingConfig = transportConfig.Routing();
 
         foreach (var publisher in publisherMetadata.Publishers)

@@ -11,7 +11,7 @@
     using System.Text.RegularExpressions;
     using Api;
 
-    public class UrlReservation
+    class UrlReservation
     {
         static Regex urlPattern = new Regex(@"^(?<protocol>https?)://(?<hostname>[^:/]+):?(?<port>\d{0,5})/?(?<virtual>[^:]*)/$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 

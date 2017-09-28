@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Extensibility;
-    using Logging;
     using Raw;
     using Routing;
     using Transport;
@@ -74,15 +73,13 @@
 
         Task OnOutsideMessage(MessageContext context, IRawEndpoint WormholeEndpoint, IRawEndpoint outsideEndpoint)
         {
-            string sourceSite;
-            if (context.Headers.TryGetValue("NServiceBus.Wormhole.SourceSite", out sourceSite))
+            if (context.Headers.ContainsKey("NServiceBus.Wormhole.SourceSite"))
             {
                 return tunnelMessageHandler.Handle(context, outsideEndpoint);
             }
             return siteMessageHandler.Handle(context, WormholeEndpoint);
         }
 
-        ILog log = LogManager.GetLogger(typeof(WormholeGateway<,>));
         string name;
         TunnelMessageHandler tunnelMessageHandler;
         SiteMessageHandler siteMessageHandler;

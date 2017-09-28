@@ -1,19 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Wormhole", "NServiceBus.WormHole\NServiceBus.Wormhole.csproj", "{86D000A5-F7B3-490F-9023-AF48290CF26C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.Wormhole", "NServiceBus.WormHole\NServiceBus.Wormhole.csproj", "{86D000A5-F7B3-490F-9023-AF48290CF26C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Wormhole.Gateway", "NServiceBus.WormHole.Gateway\NServiceBus.Wormhole.Gateway.csproj", "{F9BCCC2D-4F86-4C1D-90DF-3BA29F026A36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.Wormhole.Gateway", "NServiceBus.WormHole.Gateway\NServiceBus.Wormhole.Gateway.csproj", "{F9BCCC2D-4F86-4C1D-90DF-3BA29F026A36}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Wormhole.Tests", "NServiceBus.WormHole.Tests\NServiceBus.Wormhole.Tests.csproj", "{CD82D895-A3ED-4D30-BDAD-D25C80E03399}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.Transports.Http", "NServiceBus.Transports.Http\NServiceBus.Transports.Http.csproj", "{EA028D3A-A64C-4214-995F-48C075E02B4A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Transports.Http", "NServiceBus.Transports.Http\NServiceBus.Transports.Http.csproj", "{EA028D3A-A64C-4214-995F-48C075E02B4A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.Transports.Http.AcceptanceTests", "NServiceBus.Transports.Http.AcceptanceTests\NServiceBus.Transports.Http.AcceptanceTests.csproj", "{F439AE07-DB86-4AD5-90C2-916314659097}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Transports.Http.AcceptanceTests", "NServiceBus.Transports.Http.AcceptanceTests\NServiceBus.Transports.Http.AcceptanceTests.csproj", "{F439AE07-DB86-4AD5-90C2-916314659097}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.Wormhole.AcceptanceTests", "NServiceBus.WormHole.AcceptanceTests\NServiceBus.Wormhole.AcceptanceTests.csproj", "{E2626E98-C1FC-4514-BEE1-6A9260F99B98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Wormhole.AcceptanceTests", "NServiceBus.WormHole.AcceptanceTests\NServiceBus.Wormhole.AcceptanceTests.csproj", "{E2626E98-C1FC-4514-BEE1-6A9260F99B98}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E72AE692-252D-4E75-A9BA-8F38B9D327A5}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +33,6 @@ Global
 		{F9BCCC2D-4F86-4C1D-90DF-3BA29F026A36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9BCCC2D-4F86-4C1D-90DF-3BA29F026A36}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F9BCCC2D-4F86-4C1D-90DF-3BA29F026A36}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CD82D895-A3ED-4D30-BDAD-D25C80E03399}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD82D895-A3ED-4D30-BDAD-D25C80E03399}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD82D895-A3ED-4D30-BDAD-D25C80E03399}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD82D895-A3ED-4D30-BDAD-D25C80E03399}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EA028D3A-A64C-4214-995F-48C075E02B4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EA028D3A-A64C-4214-995F-48C075E02B4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA028D3A-A64C-4214-995F-48C075E02B4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -48,5 +48,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D71D70A8-45DC-4861-A331-DF4F6E511BD3}
 	EndGlobalSection
 EndGlobal
