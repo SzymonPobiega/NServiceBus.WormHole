@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Extensibility;
-    using Logging;
     using Raw;
     using Routing;
     using Transport;
