@@ -25,18 +25,18 @@
         /// <param name="sitesProperty">The property of message that contains the names of the destination sites.</param>
         public WormholeRoutingSettings RouteToSite<T>(Func<T, IEnumerable<string>> sitesProperty)
         {
+            string[] routeCallback(object o)
+            {
+                var message = (T)o;
+                return sitesProperty(message).ToArray();
+            }
+
             if (sitesProperty == null)
             {
                 throw new ArgumentNullException(nameof(sitesProperty));
             }
 
-            Func<object, string[]> callback = o =>
-            {
-                var message = (T) o;
-                return sitesProperty(message).ToArray();
-            };
-
-            RouteTable[typeof(T)] = callback;
+            RouteTable[typeof(T)] = routeCallback;
             return this;
         }
 
@@ -46,21 +46,21 @@
         /// <param name="siteProperty">The property of message that contains the name of the destination site.</param>
         public WormholeRoutingSettings RouteToSite<T>(Func<T, string> siteProperty)
         {
+            string[] routeCallback(object o)
+            {
+                var message = (T)o;
+                return new[]
+                {
+                    siteProperty(message)
+                };
+            }
+
             if (siteProperty == null)
             {
                 throw new ArgumentNullException(nameof(siteProperty));
             }
 
-            Func<object, string[]> callback = o =>
-            {
-                var message = (T) o;
-                return new[]
-                {
-                    siteProperty(message)
-                };
-            };
-
-            RouteTable[typeof(T)] = callback;
+            RouteTable[typeof(T)] = routeCallback;
             return this;
         }
 
@@ -70,16 +70,17 @@
         /// <param name="destinationSite">The name of the destination site.</param>
         public WormholeRoutingSettings RouteToSite<T>(string destinationSite)
         {
+            string[] routeCallback(object o) => new[]
+            {
+                destinationSite
+            };
+
             if (destinationSite == null)
             {
                 throw new ArgumentNullException(nameof(destinationSite));
             }
 
-            Func<object, string[]> callback = o => new[]
-            {
-                destinationSite
-            };
-            RouteTable[typeof(T)] = callback;
+            RouteTable[typeof(T)] = routeCallback;
             return this;
         }
     }
