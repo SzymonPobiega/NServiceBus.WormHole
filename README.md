@@ -1,4 +1,4 @@
-![Icon](https://raw.github.com/SzymonPobiega/NServiceBus.WormHole/master/icons/worm-hole.png)
+![Icon](https://raw.github.com/SzymonPobiega/NServiceBus.Wormhole/master/icons/worm-hole.png)
 
 # NServiceBus.Wormhole
 

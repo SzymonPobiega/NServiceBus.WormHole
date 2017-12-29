@@ -32,7 +32,7 @@ namespace NServiceBus.Transports.Http
                 reservation.Create();
             }
 
-            return Task.CompletedTask;
+            return Task.FromResult(0);
         }
 
         AddressParser addressParser;

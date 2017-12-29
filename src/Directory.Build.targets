@@ -1,0 +1,23 @@
+<Project>
+
+  <PropertyGroup>
+    <Authors>Szymon Pobiega</Authors>
+    <Company>Szymon Pobiega Consulting</Company>
+    <PackageLicenseUrl>https://github.com/SzymonPobiega/NServiceBus.WormHole/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Copyright>Copyright 2010-$([System.DateTime]::UtcNow.ToString(yyyy)) Szymon Pobiega. All rights reserved</Copyright>
+    <PackageTags>nservicebus gateway messages http</PackageTags>
+    <PackageIconUrl>https://Bridge.githubusercontent.com/SzymonPobiega/NServiceBus.WormHole/master/icons/worm-hole.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/SzymonPobiega/NServiceBus.WormHole</PackageProjectUrl>
+    <PackageOutputPath>..\..\nugets</PackageOutputPath>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);IncludePDBsInPackage</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <Target Name="IncludePDBsInPackage" Condition="'$(IncludeBuildOutput)' != 'false'">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(OutputPath)\$(AssemblyName).pdb" PackagePath="lib/$(TargetFramework)" />
+    </ItemGroup>
+  </Target>
+
+</Project>
