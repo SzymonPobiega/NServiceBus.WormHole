@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using NServiceBus.Routing;
 
 namespace NServiceBus.Wormhole.Gateway
 {
+    using Routing;
+
     class MessageRouter
     {
         RoutingTable routingTable;
         EndpointInstances endpointInstances;
-        IDistributionPolicy distributionPolicy;
+        DistributionPolicy distributionPolicy;
 
-        public MessageRouter(RoutingTable routingTable, EndpointInstances endpointInstances, IDistributionPolicy distributionPolicy)
+        public MessageRouter(RoutingTable routingTable, EndpointInstances endpointInstances, DistributionPolicy distributionPolicy)
         {
             this.routingTable = routingTable;
             this.endpointInstances = endpointInstances;
@@ -46,7 +47,7 @@ namespace NServiceBus.Wormhole.Gateway
                 else
                 {
                     var candidates = group.Routes.SelectMany(x => ResolveRoute(x, resolveTransportAddress)).ToArray();
-                    var selected = distributionPolicy.GetDistributionStrategy(group.EndpointName, DistributionStrategyScope.Publish).SelectReceiver(candidates);
+                    var selected = distributionPolicy.GetDistributionStrategy(group.EndpointName, DistributionStrategyScope.Publish).SelectDestination(candidates);
                     addresses.Add(selected);
                 }
             }
