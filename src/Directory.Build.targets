@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors>Szymon Pobiega</Authors>
     <Company>Szymon Pobiega Consulting</Company>
-    <PackageLicenseUrl>https://github.com/SzymonPobiega/NServiceBus.WormHole/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageLicenseUrl>https://github.com/SzymonPobiega/NServiceBus.WormHole/blob/master/LICENSE</PackageLicenseUrl>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Copyright>Copyright 2010-$([System.DateTime]::UtcNow.ToString(yyyy)) Szymon Pobiega. All rights reserved</Copyright>
     <PackageTags>nservicebus gateway messages http</PackageTags>
